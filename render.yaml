@@ -1,0 +1,23 @@
+# Render Blueprint — Hadiyah demo backend (free tier, no disk: data resets on restart/sleep).
+services:
+  - type: web
+    name: lyftr-hadiyah-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: ENV
+        value: production
+      - key: DEMO_MODE
+        value: "true"
+      - key: DB_TYPE
+        value: sqlite
+      - key: DB_PATH
+        value: /app/data/lyftr.db
+      - key: CORS_ORIGIN
+        value: https://lyftr-hadiyah.pages.dev
+      - key: JWT_SECRET
+        generateValue: true
