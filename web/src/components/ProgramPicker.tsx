@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X, BookOpen, ChevronRight, Dumbbell, AlertCircle, Moon } from 'lucide-react'
 import { programAPI } from '../services/api'
-import { apiErrorMessage, workoutDays, dayLabel, todaysDay, types } from '@lyftr/shared'
+import { apiErrorMessage, workoutDays, todaysDay, types } from '@lyftr/shared'
+import { t } from '../i18n'
+
+// dayLabel() from @lyftr/shared returns English; same rule, translated.
+const dayName = (d: types.ProgramDay) =>
+  d.name?.trim() || (d.is_rest_day ? t('Rest Day') : t('Day {n}', { n: d.order_index + 1 }))
 
 interface Props {
   onSelect: (program: types.Program, day: types.ProgramDay) => void
@@ -32,8 +37,8 @@ export default function ProgramPicker({ onSelect, onClose }: Props) {
     setDayPickFor(p)
   }
 
-  const title = dayPickFor ? dayPickFor.name : 'Load from Program'
-  const subtitle = dayPickFor ? 'Pick a day to pre-fill exercises' : 'Pick a program to pre-fill exercises'
+  const title = dayPickFor ? dayPickFor.name : t('Load from Program')
+  const subtitle = dayPickFor ? t('Pick a day to pre-fill exercises') : t('Pick a program to pre-fill exercises')
 
   // Portalled to document.body like every other overlay here (ExercisePicker,
   // ConfirmSheet, QuickWeighInSheet, BarcodeScanner, Toast). Rendered inline it
@@ -50,7 +55,7 @@ export default function ProgramPicker({ onSelect, onClose }: Props) {
             <h3 className="font-semibold text-tx-primary">{title}</h3>
             <p className="text-xs text-tx-muted mt-0.5">{subtitle}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-surface-muted rounded-lg transition-colors">
+          <button onClick={onClose} aria-label={t('Close')} className="p-1.5 hover:bg-surface-muted rounded-lg transition-colors">
             <X className="w-4 h-4 text-tx-muted" />
           </button>
         </div>
@@ -58,22 +63,22 @@ export default function ProgramPicker({ onSelect, onClose }: Props) {
         <div className="overflow-y-auto flex-1">
           {loading ? (
             <div className="flex items-center justify-center p-8 text-tx-muted text-sm">
-              <BookOpen className="w-5 h-5 mr-2 animate-pulse text-brand-500" />
-              Loading programs…
+              <BookOpen className="w-5 h-5 me-2 animate-pulse text-brand-500" />
+              {t('Loading programs…')}
             </div>
           ) : error ? (
             <div className="flex items-center gap-2 p-4 text-error-400 text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              {error}
+              {t(error)}
             </div>
           ) : dayPickFor ? (
             <div>
               <button
                 type="button"
                 onClick={() => setDayPickFor(null)}
-                className="w-full text-left px-4 py-2 text-xs text-tx-muted hover:text-tx-secondary transition-colors"
+                className="w-full text-start px-4 py-2 text-xs text-tx-muted hover:text-tx-secondary transition-colors"
               >
-                ← Back to programs
+                {t('← Back to programs')}
               </button>
               <div className="divide-y divide-surface-border">
                 {workoutDays(dayPickFor).map((day, i) => {
@@ -83,18 +88,18 @@ export default function ProgramPicker({ onSelect, onClose }: Props) {
                       key={day.id ?? i}
                       type="button"
                       onClick={() => onSelect(dayPickFor, day)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-muted transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-muted transition-colors text-start group"
                     >
                       <div className="w-9 h-9 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center flex-shrink-0">
                         <Dumbbell className="w-4 h-4 text-brand-500" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-tx-primary truncate flex items-center gap-1.5">
-                          {dayLabel(day, day.order_index)}
-                          {isToday && <span className="text-[10px] font-bold text-brand-400 bg-brand-500/15 px-1.5 py-0.5 rounded-full">TODAY</span>}
+                          {dayName(day)}
+                          {isToday && <span className="text-[10px] font-bold text-brand-400 bg-brand-500/15 px-1.5 py-0.5 rounded-full">{t('TODAY')}</span>}
                         </p>
                         <span className="text-xs text-tx-muted">
-                          {(day.exercises ?? []).length} exercise{(day.exercises ?? []).length === 1 ? '' : 's'}
+                          {t((day.exercises ?? []).length === 1 ? '{n} exercise' : '{n} exercises', { n: (day.exercises ?? []).length })}
                         </span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-tx-muted flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -106,8 +111,8 @@ export default function ProgramPicker({ onSelect, onClose }: Props) {
           ) : programs.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <BookOpen className="w-8 h-8 text-tx-muted mb-2 opacity-50" />
-              <p className="text-sm text-tx-muted">No programs yet</p>
-              <p className="text-xs text-tx-muted mt-1">Create a program first</p>
+              <p className="text-sm text-tx-muted">{t('No programs yet')}</p>
+              <p className="text-xs text-tx-muted mt-1">{t('Create a program first')}</p>
             </div>
           ) : (
             <div className="divide-y divide-surface-border">
@@ -119,7 +124,7 @@ export default function ProgramPicker({ onSelect, onClose }: Props) {
                     type="button"
                     disabled={days.length === 0}
                     onClick={() => pickProgram(p)}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent transition-colors text-start group"
                   >
                     <div className="w-9 h-9 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center flex-shrink-0">
                       <BookOpen className="w-4 h-4 text-brand-500" />
@@ -128,11 +133,11 @@ export default function ProgramPicker({ onSelect, onClose }: Props) {
                       <p className="text-sm font-medium text-tx-primary truncate">{p.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-xs text-tx-muted">
-                          <Dumbbell className="w-3 h-3 inline mr-1" />
-                          {days.length === 0 ? 'No exercises yet' : `${days.length} workout day${days.length === 1 ? '' : 's'}`}
+                          <Dumbbell className="w-3 h-3 inline me-1" />
+                          {days.length === 0 ? t('No exercises yet') : t(days.length === 1 ? '{n} workout day' : '{n} workout days', { n: days.length })}
                         </span>
                         {(p.days ?? []).some(d => d.is_rest_day) && (
-                          <span className="text-xs text-tx-muted"><Moon className="w-3 h-3 inline mr-0.5" />rest days</span>
+                          <span className="text-xs text-tx-muted"><Moon className="w-3 h-3 inline me-0.5" />{t('rest days')}</span>
                         )}
                       </div>
                     </div>

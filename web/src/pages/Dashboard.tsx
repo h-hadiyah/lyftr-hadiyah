@@ -20,6 +20,19 @@ import { useSettingsStore, weightShort, displayWeight, displayVolume } from '../
 import { apiErrorMessage, isDailyStats, workoutDay, entryDay, types, activeSessionExercisesForDay, dayLabel, sessionNameForDay, nextStartableDay, muscleRoast, muscleHex, calcVolume, greeting, formatDay } from '@lyftr/shared'
 import { useNavigate, Link } from 'react-router-dom'
 import { muscleColor } from '../utils/exerciseUtils'
+import { t, dateLocale, dfLocale } from '../i18n'
+
+// formatDay (shared) has no locale parameter; it still guards the day string, then the
+// month name is rendered in the UI language here.
+const dayShort = (d: string) => {
+  const ok = formatDay(d, 'yyyy-MM-dd')
+  return ok === d ? format(new Date(`${d}T00:00`), 'MMM d', { locale: dfLocale }) : ok
+}
+// dayLabel (shared) falls back to English "Day N" / "Rest Day" for unnamed days.
+const trDayLabel = (s: string) => {
+  const m = /^Day (\d+)$/.exec(s)
+  return m ? t('Day {n}', { n: m[1] }) : t(s)
+}
 
 const DEFAULT_FOOD: types.DailyStats = {
   date: '',
@@ -154,7 +167,7 @@ export default function Dashboard() {
     return (
       <ErrorState
         size="page"
-        title="Couldn't load your dashboard"
+        title={t("Couldn't load your dashboard")}
         message={error}
         onRetry={() => { setError(null); setLoading(true); setRetryKey(k => k + 1) }}
       />
@@ -211,9 +224,9 @@ export default function Dashboard() {
   }
   // month labels: show month name on first week that starts in that month
   const monthLabels: (string | null)[] = heatmapWeeks.map((week, i) => {
-    const m = format(week[0], 'MMM')
+    const m = format(week[0], 'MMM', { locale: dfLocale })
     if (i === 0) return m
-    const prev = format(heatmapWeeks[i - 1][0], 'MMM')
+    const prev = format(heatmapWeeks[i - 1][0], 'MMM', { locale: dfLocale })
     return m !== prev ? m : null
   })
 
@@ -264,10 +277,10 @@ export default function Dashboard() {
       <div className="flex justify-between items-start gap-3">
         <div className="min-w-0">
           <p className="text-[11px] text-tx-muted uppercase tracking-wider font-medium">
-            {format(TODAY, 'EEEE, MMMM d')}
+            {format(TODAY, 'EEEE, MMMM d', { locale: dfLocale })}
           </p>
           <h1 className="font-display font-bold text-2xl text-tx-primary mt-0.5">
-            {greeting(TODAY)}, {username}
+            {t('{greeting}, {name}', { greeting: t(greeting(TODAY)), name: username })}
           </h1>
         </div>
         <button
@@ -275,7 +288,7 @@ export default function Dashboard() {
           className="btn-primary btn-sm flex-shrink-0"
         >
           <Play className="w-3.5 h-3.5" />
-          {session ? 'Resume' : 'Start'}
+          {session ? t('Resume') : t('Start')}
         </button>
       </div>
 
@@ -290,8 +303,8 @@ export default function Dashboard() {
               <Timer className="w-4 h-4 text-amber-400 animate-pulse" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-amber-300">Workout in progress</p>
-              <p className="text-xs text-amber-400/70">{session.name} — tap to resume</p>
+              <p className="text-sm font-semibold text-amber-300">{t('Workout in progress')}</p>
+              <p className="text-xs text-amber-400/70">{t('{name} — tap to resume', { name: session.name })}</p>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-amber-400 flex-shrink-0" />
@@ -312,7 +325,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-3 card p-3 hover:bg-surface-muted/40 transition-colors">
           <Link
             to={`/programs/${upNext.program.id}`}
-            aria-label={`View ${upNext.program.name} routine`}
+            aria-label={t('View {name} routine', { name: upNext.program.name })}
             className="flex items-center gap-3 flex-1 min-w-0"
           >
             {upNext.day.exercises?.[0]?.exercise?.image_url ? (
@@ -328,14 +341,14 @@ export default function Dashboard() {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] text-tx-muted uppercase tracking-wide font-medium truncate">Up next · {upNext.program.name}</p>
-              <p className="text-sm font-semibold text-tx-primary truncate mt-0.5">{dayLabel(upNext.day, upNext.day.order_index)}</p>
-              <p className="text-xs text-tx-muted mt-0.5">{(upNext.day.exercises ?? []).length} exercise{(upNext.day.exercises ?? []).length === 1 ? '' : 's'}</p>
+              <p className="text-[10px] text-tx-muted uppercase tracking-wide font-medium truncate">{t('Up next · {name}', { name: upNext.program.name })}</p>
+              <p className="text-sm font-semibold text-tx-primary truncate mt-0.5">{trDayLabel(dayLabel(upNext.day, upNext.day.order_index))}</p>
+              <p className="text-xs text-tx-muted mt-0.5">{t('{n} exercises', { n: (upNext.day.exercises ?? []).length })}</p>
             </div>
           </Link>
           <button
             onClick={startUpNext}
-            aria-label={`Start ${dayLabel(upNext.day, upNext.day.order_index)}`}
+            aria-label={t('Start {name}', { name: trDayLabel(dayLabel(upNext.day, upNext.day.order_index)) })}
             className="flex items-center justify-center w-9 h-9 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-colors flex-shrink-0"
           >
             <Play className="w-4 h-4" />
@@ -347,25 +360,25 @@ export default function Dashboard() {
       <div className="grid grid-cols-3 gap-2">
         <div className="card p-3 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-tx-muted uppercase tracking-wide font-medium">Week</span>
+            <span className="text-[10px] text-tx-muted uppercase tracking-wide font-medium">{t('Week')}</span>
             <Dumbbell className="w-3 h-3 text-tx-muted" />
           </div>
           <p className="text-xl font-bold text-tx-primary leading-none">{weekWorkouts.length}</p>
-          <p className="text-[10px] text-tx-muted">sessions</p>
+          <p className="text-[10px] text-tx-muted">{t('sessions')}</p>
         </div>
 
         <div className="card p-3 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-tx-muted uppercase tracking-wide font-medium">Cals</span>
+            <span className="text-[10px] text-tx-muted uppercase tracking-wide font-medium">{t('Cals')}</span>
             <Flame className="w-3 h-3 text-tx-muted" />
           </div>
           {foodMissing ? (
-            <StatFailure label="Couldn't load today's calories" />
+            <StatFailure label={t("Couldn't load today's calories")} />
           ) : (
             <>
               <p className="text-xl font-bold text-tx-primary leading-none">{Math.round(food.total_calories)}</p>
               <div className="progress-track">
-                <div className="progress-bar" style={{ width: `${calPct}%`, background: '#00b8d9' }} />
+                <div className="progress-bar" style={{ width: `${calPct}%`, background: '#00A195' }} />
               </div>
             </>
           )}
@@ -373,15 +386,15 @@ export default function Dashboard() {
 
         <div className="card p-3 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-tx-muted uppercase tracking-wide font-medium">Protein</span>
+            <span className="text-[10px] text-tx-muted uppercase tracking-wide font-medium">{t('Protein')}</span>
             <Beef className="w-3 h-3 text-tx-muted" />
           </div>
           {foodMissing ? (
-            <StatFailure label="Couldn't load today's protein" />
+            <StatFailure label={t("Couldn't load today's protein")} />
           ) : (
             <>
               <p className="text-xl font-bold text-tx-primary leading-none">
-                {Math.round(food.total_protein)}<span className="text-xs text-tx-muted font-normal">g</span>
+                {Math.round(food.total_protein)}<span className="text-xs text-tx-muted font-normal">{t('g')}</span>
               </p>
               <div className="progress-track">
                 <div className="progress-bar" style={{ width: `${protPct}%`, background: '#f59e0b' }} />
@@ -395,7 +408,7 @@ export default function Dashboard() {
       <div className="card p-4">
         <SectionHeader
           icon={TrendingUp}
-          title="Volume Trend"
+          title={t('Volume Trend')}
           right={<PeriodSelector options={['7', '14', '30'] as const} value={volumePeriod} onChange={setVolumePeriod} />}
           className="mb-3"
         />
@@ -403,7 +416,7 @@ export default function Dashboard() {
         {chartData.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 gap-2">
             <Dumbbell className="w-6 h-6 text-tx-muted opacity-40" />
-            <p className="text-xs text-tx-muted">Log workouts to see trends</p>
+            <p className="text-xs text-tx-muted">{t('Log workouts to see trends')}</p>
           </div>
         ) : (
           <>
@@ -419,7 +432,7 @@ export default function Dashboard() {
                 <YAxis hide />
                 <Tooltip
                   contentStyle={TOOLTIP_STYLE}
-                  formatter={(v: number) => [`${v.toLocaleString()} ${wUnit}`, 'Volume']}
+                  formatter={(v: number) => [`${v.toLocaleString(dateLocale)} ${wUnit}`, t('Volume')]}
                   labelFormatter={(label: string) => chartData.find(d => d.date === label)?.name || label}
                   cursor={{ fill: 'rgba(99,102,241,0.08)', radius: 4 }}
                 />
@@ -441,7 +454,7 @@ export default function Dashboard() {
                 return (
                   <div key={i} className="flex flex-col items-center gap-1.5">
                     <span className={`text-[10px] font-semibold ${isToday ? 'text-brand-400' : 'text-tx-muted'}`}>
-                      {format(day, 'EEEEE')}
+                      {format(day, 'EEEEE', { locale: dfLocale })}
                     </span>
                     <div className={`w-3 h-3 rounded-full transition-all ${
                       hasWorkout   ? 'bg-brand-500 shadow-sm shadow-brand-500/50' :
@@ -461,14 +474,14 @@ export default function Dashboard() {
       <div className="card p-4">
         <SectionHeader
           icon={Activity}
-          title="Consistency"
-          right={<span className="text-xs text-tx-muted">12 weeks</span>}
+          title={t('Consistency')}
+          right={<span className="text-xs text-tx-muted">{t('{n} weeks', { n: 12 })}</span>}
           className="mb-3"
         />
 
         {workouts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 gap-2">
-            <p className="text-xs text-tx-muted">Start working out to build your streak</p>
+            <p className="text-xs text-tx-muted">{t('Start working out to build your streak')}</p>
           </div>
         ) : (
           <>
@@ -486,7 +499,8 @@ export default function Dashboard() {
               ))}
 
               {/* Rows 1–7: day label + cells */}
-              {(['M', '', 'W', '', 'F', '', 'S'] as const).map((lbl, dayIdx) => (
+              {/* Day initials in the UI language, every other row (Mon, Wed, Fri, Sun). */}
+              {[0, 1, 2, 3, 4, 5, 6].map(i => i % 2 ? '' : format(heatmapWeeks[0][i], 'EEEEE', { locale: dfLocale })).map((lbl, dayIdx) => (
                 [
                   <div key={`lbl-${dayIdx}`} className="text-[9px] text-tx-muted/60 font-medium flex items-center leading-none">
                     {lbl}
@@ -499,7 +513,7 @@ export default function Dashboard() {
                     return (
                       <div
                         key={`${wi}-${dayIdx}`}
-                        title={`${format(day, 'MMM d')}${count > 0 ? ` · ${count} workout${count > 1 ? 's' : ''}` : ''}`}
+                        title={`${format(day, 'MMM d', { locale: dfLocale })}${count > 0 ? ` · ${t('{n} workouts', { n: count })}` : ''}`}
                         className={`h-3 rounded-[2px] transition-colors ${
                           future      ? 'bg-surface-muted/20' :
                           count === 0 ? 'bg-surface-muted/50' :
@@ -515,11 +529,11 @@ export default function Dashboard() {
 
             {/* Legend */}
             <div className="flex items-center gap-1.5 mt-2 justify-end">
-              <span className="text-[9px] text-tx-muted">Less</span>
+              <span className="text-[9px] text-tx-muted">{t('Less')}</span>
               {['bg-surface-muted/50', 'bg-brand-500/30', 'bg-brand-500/60', 'bg-brand-500'].map((cls, i) => (
                 <div key={i} className={`w-3 h-3 rounded-[3px] ${cls}`} />
               ))}
-              <span className="text-[9px] text-tx-muted">More</span>
+              <span className="text-[9px] text-tx-muted">{t('More')}</span>
             </div>
           </>
         )}
@@ -540,14 +554,14 @@ export default function Dashboard() {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-tx-primary truncate">{lastWorkout.name}</p>
                   <p className="text-xs text-tx-muted mt-0.5">
-                    {formatDay(workoutDay(lastWorkout), 'MMM d')}
-                    {mins > 0 && ` · ${mins} min`}
-                    {totalSets > 0 && ` · ${totalSets} set${totalSets === 1 ? '' : 's'}`}
-                    {totalVolume > 0 && ` · ${totalVolume.toLocaleString()} ${wUnit}`}
+                    {dayShort(workoutDay(lastWorkout))}
+                    {mins > 0 && ` · ${t('{n} min', { n: mins })}`}
+                    {totalSets > 0 && ` · ${t('{n} sets', { n: totalSets })}`}
+                    {totalVolume > 0 && ` · ${totalVolume.toLocaleString(dateLocale)} ${wUnit}`}
                   </p>
                 </div>
                 <Link to="/workouts" className="flex items-center gap-0.5 text-xs text-brand-400 hover:text-brand-300 flex-shrink-0 transition-colors">
-                  All <ArrowRight className="w-3 h-3" />
+                  {t('All')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
 
@@ -575,12 +589,12 @@ export default function Dashboard() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-tx-secondary truncate">{ex.exercise.name}</p>
                         <span className={`text-[10px] px-1 py-0.5 rounded ${muscleColor(ex.exercise.muscle_group)}`}>
-                          {ex.exercise.muscle_group}
+                          {t(ex.exercise.muscle_group)}
                         </span>
                       </div>
                       {best && (
                         <span className="text-xs text-tx-muted tabular-nums flex-shrink-0">
-                          {sets.length}×{best.weight > 0 ? ` ${displayWeight(best.weight, settings.weight_unit)}${wUnit}` : ' BW'}
+                          {sets.length}×{best.weight > 0 ? ` ${displayWeight(best.weight, settings.weight_unit)}${wUnit}` : ` ${t('BW')}`}
                         </span>
                       )}
                     </div>
@@ -590,7 +604,7 @@ export default function Dashboard() {
 
               {exs.length > 4 && (
                 <p className="text-xs text-tx-muted text-center pt-2">
-                  +{exs.length - 4} more exercises
+                  {t('+{n} more exercises', { n: exs.length - 4 })}
                 </p>
               )}
             </div>
@@ -598,7 +612,7 @@ export default function Dashboard() {
         })() : (
           <div className="card p-4 flex flex-col items-center justify-center min-h-36 gap-2">
             <Dumbbell className="w-7 h-7 text-tx-muted opacity-40" />
-            <p className="text-sm text-tx-muted">No workouts logged yet</p>
+            <p className="text-sm text-tx-muted">{t('No workouts logged yet')}</p>
             {/* Suppressed when the Up Next card is already showing above — that
                 card is its own "start something" CTA; a second "start your first
                 workout" link right under it is the redundant-buttons clutter this
@@ -608,7 +622,7 @@ export default function Dashboard() {
                 onClick={() => navigate('/workout/start')}
                 className="text-xs text-brand-400 hover:text-brand-300 font-medium transition-colors mt-1"
               >
-                Start your first workout →
+                {t('Start your first workout →')}
               </button>
             )}
           </div>
@@ -617,9 +631,9 @@ export default function Dashboard() {
         {/* Nutrition */}
         <div className="card p-4 overflow-hidden min-w-0">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="section-title">Today's Nutrition</h2>
+            <h2 className="section-title">{t("Today's Nutrition")}</h2>
             <Link to="/food" className="text-xs text-brand-400 hover:text-brand-300 transition-colors flex-shrink-0">
-              Log →
+              {t('Log →')}
             </Link>
           </div>
 
@@ -628,7 +642,7 @@ export default function Dashboard() {
             // sentence and the retry belong here, in the section that owns them.
             <ErrorState
               size="section"
-              title="Couldn't load today's food"
+              title={t("Couldn't load today's food")}
               message={missing["today's food"]}
               onRetry={retry}
             />
@@ -639,12 +653,12 @@ export default function Dashboard() {
             <span className="text-3xl font-bold text-tx-primary tabular-nums leading-none">
               {Math.round(food.total_calories)}
             </span>
-            <span className="text-xs text-tx-muted">/ {settings.calorie_target} kcal</span>
+            <span className="text-xs text-tx-muted">/ {settings.calorie_target} {t('kcal')}</span>
             <div className="flex-1" />
             <span className="text-xs text-tx-muted tabular-nums">{Math.round(calPct)}%</span>
           </div>
           <div className="progress-track mb-4">
-            <div className="progress-bar" style={{ width: `${calPct}%`, background: '#00b8d9' }} />
+            <div className="progress-bar" style={{ width: `${calPct}%`, background: '#00A195' }} />
           </div>
 
           {/* Macros */}
@@ -652,14 +666,14 @@ export default function Dashboard() {
             {[
               { label: 'Protein', val: food.total_protein, target: settings.protein_target, pct: protPct,  color: '#3b82f6' },
               { label: 'Carbs',   val: food.total_carbs,   target: settings.carb_target,    pct: carbsPct, color: '#f59e0b' },
-              { label: 'Fat',     val: food.total_fat,     target: settings.fat_target,     pct: fatPct,   color: '#8b5cf6' },
+              { label: 'Fat',     val: food.total_fat,     target: settings.fat_target,     pct: fatPct,   color: '#CEB26B' },
             ].map(m => (
               <div key={m.label}>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs text-tx-muted">{m.label}</span>
+                  <span className="text-xs text-tx-muted">{t(m.label)}</span>
                   <span className="text-xs font-semibold text-tx-primary tabular-nums">
-                    {Math.round(m.val)}g
-                    <span className="text-tx-muted font-normal"> / {m.target}g</span>
+                    {Math.round(m.val)}{t('g')}
+                    <span className="text-tx-muted font-normal"> / {m.target}{t('g')}</span>
                   </span>
                 </div>
                 <div className="progress-track">
@@ -677,23 +691,23 @@ export default function Dashboard() {
       <div className="card p-4">
           <SectionHeader
             icon={Dumbbell}
-            title="Muscle Balance"
-            right={<span className="text-xs text-tx-muted">{workouts.length} workout{workouts.length === 1 ? '' : 's'}</span>}
+            title={t('Muscle Balance')}
+            right={<span className="text-xs text-tx-muted">{t('{n} workouts', { n: workouts.length })}</span>}
             className="mb-1"
           />
 
           {topMuscle ? (
             <p className="text-xs text-tx-muted mb-3 italic">
-              {muscleRoast(topMuscle)}
+              {t(muscleRoast(topMuscle))}
             </p>
           ) : (
-            <p className="text-xs text-tx-muted mb-3">Log workouts to see which muscles you train most.</p>
+            <p className="text-xs text-tx-muted mb-3">{t('Log workouts to see which muscles you train most.')}</p>
           )}
 
           {muscleData.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-6 gap-2">
               <Dumbbell className="w-6 h-6 text-tx-muted opacity-30" />
-              <p className="text-xs text-tx-muted">No workout data yet</p>
+              <p className="text-xs text-tx-muted">{t('No workout data yet')}</p>
             </div>
           ) : (
           <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -718,8 +732,8 @@ export default function Dashboard() {
                   <Tooltip
                     contentStyle={TOOLTIP_STYLE}
                     formatter={(v: number, _: string, props: { payload?: { name: string } }) => [
-                      `${v} set${v === 1 ? '' : 's'} (${Math.round((v / totalMuscSets) * 100)}%)`,
-                      props.payload?.name ?? '',
+                      `${t('{n} sets', { n: v })} (${Math.round((v / totalMuscSets) * 100)}%)`,
+                      t(props.payload?.name ?? ''),
                     ]}
                   />
                 </PieChart>
@@ -738,11 +752,11 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2 mb-0.5">
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
                       <span className={`text-xs capitalize flex-1 min-w-0 truncate ${isTop ? 'font-semibold text-tx-primary' : 'text-tx-secondary'}`}>
-                        {d.name}
-                        {isTop && <span className="ml-1 text-[9px] font-normal text-tx-muted uppercase tracking-wide">top</span>}
+                        {t(d.name)}
+                        {isTop && <span className="ms-1 text-[9px] font-normal text-tx-muted uppercase tracking-wide">{t('top')}</span>}
                       </span>
                       <MuscleSparkline values={values} color={color} isTop={isTop} />
-                      <span className="text-xs text-tx-muted tabular-nums w-16 text-right flex-shrink-0">
+                      <span className="text-xs text-tx-muted tabular-nums w-16 text-end flex-shrink-0">
                         {d.value} · {pct}%
                       </span>
                     </div>
@@ -761,10 +775,10 @@ export default function Dashboard() {
       <div className="card p-4">
         <SectionHeader
           icon={Scale}
-          title="Weight"
+          title={t('Weight')}
           right={
             <Link to="/weight" className="text-xs text-brand-400 hover:text-brand-300 transition-colors flex items-center gap-0.5">
-              View <ArrowRight className="w-3 h-3" />
+              {t('View')} <ArrowRight className="w-3 h-3" />
             </Link>
           }
           className="mb-2"
@@ -776,7 +790,7 @@ export default function Dashboard() {
           // rather than the bare mark a stat tile has room for.
           <ErrorState
             size="section"
-            title="Couldn't load your weight"
+            title={t("Couldn't load your weight")}
             message={missing['your weight']}
             onRetry={retry}
           />
@@ -784,22 +798,22 @@ export default function Dashboard() {
           <button
             type="button"
             onClick={() => setSheetOpen(true)}
-            className="w-full flex items-center gap-3 p-3 bg-brand-500/5 border border-dashed border-brand-500/30 rounded-xl hover:bg-brand-500/10 transition-colors text-left"
+            className="w-full flex items-center gap-3 p-3 bg-brand-500/5 border border-dashed border-brand-500/30 rounded-xl hover:bg-brand-500/10 transition-colors text-start"
           >
             <div className="w-9 h-9 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center flex-shrink-0">
               <Plus className="w-4 h-4 text-brand-500" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-tx-primary">Log your first weight</p>
-              <p className="text-xs text-tx-muted">Tap to start tracking</p>
+              <p className="text-sm font-semibold text-tx-primary">{t('Log your first weight')}</p>
+              <p className="text-xs text-tx-muted">{t('Tap to start tracking')}</p>
             </div>
           </button>
         ) : (
           <button
             type="button"
             onClick={() => setSheetOpen(true)}
-            className="w-full text-left active:scale-[0.99] transition-transform"
-            aria-label="Log weight"
+            className="w-full text-start active:scale-[0.99] transition-transform"
+            aria-label={t('Log weight')}
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-baseline gap-1.5">
@@ -812,11 +826,11 @@ export default function Dashboard() {
                 {(() => {
                   const delta = weightStats?.change_7d ?? 0
                   if (delta === 0) {
-                    return <span className="text-xs text-tx-muted">7d · no change</span>
+                    return <span className="text-xs text-tx-muted">{t('7d · no change')}</span>
                   }
                   return (
                     <span className={`text-xs tabular-nums ${delta < 0 ? 'text-success-400' : 'text-error-400'}`}>
-                      7d · {delta < 0 ? '↓' : '↑'}{Math.abs(displayWeight(delta, settings.weight_unit))} {wUnit}
+                      {t('7d')} · {delta < 0 ? '↓' : '↑'}{Math.abs(displayWeight(delta, settings.weight_unit))} {wUnit}
                     </span>
                   )
                 })()}
@@ -832,7 +846,7 @@ export default function Dashboard() {
                     <Line dataKey="weight" dot={false} stroke="#6366f1" strokeWidth={2} type="monotone" />
                     <Tooltip
                       contentStyle={TOOLTIP_STYLE}
-                      formatter={(v: number) => [`${v} ${wUnit}`, 'Weight']}
+                      formatter={(v: number) => [`${v} ${wUnit}`, t('Weight')]}
                     />
                   </LineChart>
                 </ResponsiveContainer>

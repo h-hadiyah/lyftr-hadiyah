@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AlertCircle, Check, Eye, EyeOff, X } from 'lucide-react'
 import type { RuleState } from '@lyftr/shared'
+import { t } from '../../i18n'
 
 export function Rule({ state, children }: { state: RuleState; children: React.ReactNode }) {
   const tone =
@@ -46,7 +47,7 @@ export default function PasswordField({
         <input
           id={id}
           type={visible ? 'text' : 'password'}
-          className="input pr-11"
+          className="input pe-11"
           autoComplete={autoComplete}
           placeholder={placeholder}
           value={value}
@@ -64,15 +65,15 @@ export default function PasswordField({
           // tabIndex -1 keeps Tab running straight down the fields to the submit button,
           // which is the path someone filling this form actually wants.
           tabIndex={-1}
-          aria-label={visible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
-          className="absolute inset-y-0 right-0 px-3 flex items-center text-tx-muted hover:text-tx-primary transition-colors"
+          aria-label={visible ? t('Hide {label}', { label: label.toLowerCase() }) : t('Show {label}', { label: label.toLowerCase() })}
+          className="absolute inset-y-0 end-0 px-3 flex items-center text-tx-muted hover:text-tx-primary transition-colors"
         >
           {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
       {caps && (
         <p className="flex items-center gap-1.5 text-xs mt-1.5 text-warning-400">
-          <AlertCircle className="w-3 h-3 flex-shrink-0" /> Caps Lock is on
+          <AlertCircle className="w-3 h-3 flex-shrink-0" /> {t('Caps Lock is on')}
         </p>
       )}
       {children}

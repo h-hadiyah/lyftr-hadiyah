@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   Home, Dumbbell, Apple, Scale, BookOpen,
   LogOut, Moon, Sun, User,
-  Timer, ChevronRight,
+  Timer, ChevronRight, HandHeart,
 } from 'lucide-react'
 import { useAuthStore } from '../stores/auth'
 import { useTheme } from '../hooks/useTheme'
@@ -15,6 +15,7 @@ import GymModeWorkout from '../pages/GymModeWorkout'
 import RestTimerBanner from './RestTimerBanner'
 import Logo from './Logo'
 import ErrorBoundary from './ErrorBoundary'
+import { t } from '../i18n'
 
 const NAV = [
   { path: '/',          label: 'Home',     icon: Home },
@@ -22,6 +23,7 @@ const NAV = [
   { path: '/programs',  label: 'Programs', icon: BookOpen },
   { path: '/food',      label: 'Food',     icon: Apple },
   { path: '/weight',    label: 'Weight',   icon: Scale },
+  { path: '/charity',   label: 'Charity',  icon: HandHeart },
 ]
 
 function ActiveSessionBar() {
@@ -52,7 +54,7 @@ function ActiveSessionBar() {
   }
 
   return (
-    <div className="absolute bottom-full left-0 right-0 flex justify-center pb-3 pointer-events-none">
+    <div className="absolute bottom-full start-0 end-0 flex justify-center pb-3 pointer-events-none">
       <button
         onClick={handleClick}
         className="pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 bg-brand-500 hover:bg-brand-600 active:scale-95 shadow-lg shadow-brand-500/40 rounded-full transition-all"
@@ -60,14 +62,14 @@ function ActiveSessionBar() {
         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
           <Timer className="w-3 h-3 text-white" />
         </div>
-        <div className="text-left">
+        <div className="text-start">
           <p className="text-xs font-bold text-white leading-tight truncate max-w-[140px]">{session.name}</p>
-          <p className="text-[11px] text-white/70 leading-tight">{completedSets}/{totalSets} sets · {formatElapsed(elapsed)}</p>
+          <p className="text-[11px] text-white/70 leading-tight">{t('{done}/{total} sets', { done: completedSets, total: totalSets })} · {formatElapsed(elapsed)}</p>
         </div>
         {resting && (
-          <div className="flex items-center gap-1.5 pl-2.5 py-1 pr-1 rounded-full bg-white/15 flex-shrink-0">
+          <div className="flex items-center gap-1.5 ps-2.5 py-1 pe-1 rounded-full bg-white/15 flex-shrink-0">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-white/70 leading-none">
-              {done ? 'Rest over' : paused ? 'Paused' : 'Rest'}
+              {done ? t('Rest over') : paused ? t('Paused') : t('Rest')}
             </span>
             {!done && <span className="text-xs font-bold text-white tabular-nums leading-none">{fmtClock(left)}</span>}
           </div>
@@ -104,15 +106,15 @@ function UserMenu() {
             ? 'ring-2 ring-brand-500 ring-offset-2 ring-offset-surface-base'
             : 'hover:ring-2 hover:ring-surface-border hover:ring-offset-2 hover:ring-offset-surface-base'
         }`}
-        aria-label="User menu"
+        aria-label={t('User menu')}
       >
-        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0891b2, #00b8d9)' }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #00746B, #00A195)' }}>
           <span className="text-sm font-bold text-white leading-none">{initial}</span>
         </div>
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-surface-overlay border border-surface-border/60 rounded-2xl shadow-dropdown z-50 animate-slide-up overflow-hidden">
+        <div className="absolute end-0 top-full mt-2 w-56 bg-surface-overlay border border-surface-border/60 rounded-2xl shadow-dropdown z-50 animate-slide-up overflow-hidden">
           {/* User info */}
           <div className="px-4 py-3 border-b border-surface-border/40">
             <p className="text-sm font-semibold text-tx-primary truncate">{username}</p>
@@ -127,15 +129,15 @@ function UserMenu() {
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-tx-secondary hover:text-tx-primary hover:bg-surface-muted/50 transition-colors"
             >
               <User className="w-4 h-4 text-tx-muted flex-shrink-0" />
-              Settings
+              {t('Settings')}
             </Link>
             <button
               onClick={toggleTheme}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-tx-secondary hover:text-tx-primary hover:bg-surface-muted/50 transition-colors"
             >
               {theme === 'dark'
-                ? <><Sun className="w-4 h-4 text-tx-muted flex-shrink-0" />Light mode</>
-                : <><Moon className="w-4 h-4 text-tx-muted flex-shrink-0" />Dark mode</>
+                ? <><Sun className="w-4 h-4 text-tx-muted flex-shrink-0" />{t('Light mode')}</>
+                : <><Moon className="w-4 h-4 text-tx-muted flex-shrink-0" />{t('Dark mode')}</>
               }
             </button>
           </div>
@@ -147,7 +149,7 @@ function UserMenu() {
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-error-400 hover:bg-error-500/10 transition-colors"
             >
               <LogOut className="w-4 h-4 flex-shrink-0" />
-              Sign out
+              {t('Sign out')}
             </button>
           </div>
         </div>
@@ -189,7 +191,7 @@ export default function Layout() {
         {/* Keyed on the path so the boundary RESETS on navigation: without the key a
             crash on one route would follow the user to every other one, turning a bad
             row on /workouts into an app that looks broken everywhere. */}
-        <ErrorBoundary key={pathname} subject="this page">
+        <ErrorBoundary key={pathname} subject={t('this page')}>
           <Outlet />
         </ErrorBoundary>
       </main>
@@ -213,9 +215,9 @@ export default function Layout() {
             {NAV.map(({ path, label, icon: Icon }) => {
               const active = pathname === path
               return (
-                <Link key={path} to={path} className={`nav-item flex-1 ${active ? 'active' : ''}`}>
+                <Link key={path} to={path} className={`nav-item flex-1 min-w-0 ${active ? 'active' : ''}`}>
                   <Icon className="w-5 h-5" strokeWidth={active ? 2.5 : 1.75} />
-                  <span>{label}</span>
+                  <span className="max-w-full truncate px-0.5">{t(label)}</span>
                 </Link>
               )
             })}

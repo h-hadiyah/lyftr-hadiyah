@@ -24,38 +24,38 @@ export type SurfaceTokens = {
 
 export const surfaces: Record<'light' | 'dark', SurfaceTokens> = {
   light: {
-    base: '#f8fafc',
+    base: '#f6f7f6',
     raised: '#ffffff',
-    overlay: '#f1f5f9',
-    border: '#e2e8f0',
-    muted: '#f1f5f9',
-    txPrimary: '#0f172a',
-    txSecondary: '#475569',
-    txMuted: '#94a3b8',
+    overlay: '#eff1f0',
+    border: '#E2E3E2',
+    muted: '#eff1f0',
+    txPrimary: '#2b3238',
+    txSecondary: '#3C454E',
+    txMuted: '#7d868e',
     txInverse: '#ffffff',
   },
   dark: {
-    base: '#070d1a',
-    raised: '#0d1629',
-    overlay: '#111e35',
-    border: '#1c2f50',
-    muted: '#162240',
-    txPrimary: '#f1f5f9',
-    txSecondary: '#94a3b8',
-    txMuted: '#475569',
-    txInverse: '#0f172a',
+    base: '#0e1615',
+    raised: '#15201f',
+    overlay: '#1b2928',
+    border: '#263837',
+    muted: '#1e2d2c',
+    txPrimary: '#f1f4f3',
+    txSecondary: '#a9b4b2',
+    txMuted: '#6b7a78',
+    txInverse: '#2b3238',
   },
 }
 
 // Theme-independent: these read the same on either surface.
 export const palette = {
   brand: {
-    50: '#e0f9ff', 100: '#b0f1fe', 200: '#7ae7fd', 300: '#38d8fb', 400: '#0ecef7',
-    500: '#00b8d9', 600: '#0099b8', 700: '#007a96', 800: '#005c72', 900: '#003d4d',
-    DEFAULT: '#00b8d9',
+    50: '#e6f6f4', 100: '#c0e9e5', 200: '#8fd8d1', 300: '#55c3b9', 400: '#22b1a5',
+    500: '#00A195', 600: '#008a80', 700: '#00746B', 800: '#005c55', 900: '#003f3a',
+    DEFAULT: '#00A195',
   },
-  violet: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', DEFAULT: '#8b5cf6' },
-  success: { 400: '#4ade80', 500: '#22c55e', 800: '#166534', DEFAULT: '#22c55e' },
+  violet: { 400: '#E0C890', 500: '#CEB26B', 600: '#a88d48', DEFAULT: '#CEB26B' },
+  success: { 400: '#84D3A4', 500: '#009670', 800: '#166534', DEFAULT: '#009670' },
   warning: { 400: '#facc15', 500: '#eab308', 800: '#854d0e', DEFAULT: '#eab308' },
   error: { 400: '#f87171', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c', 800: '#991b1b', DEFAULT: '#ef4444' },
 } as const
@@ -63,14 +63,14 @@ export const palette = {
 export const accents = {
   // Darker cyan for accents sitting on light surfaces (the web login link colour).
   // Tailwind's cyan-600 — outside the brand ramp, which is tuned for dark surfaces.
-  cyanEdge: '#0891b2',
+  cyanEdge: '#00746B',
   // For text on a brand-tinted alert in light mode: cyanEdge measures 3.4:1 there,
   // below AA. This rung clears it on both the /10 and /20 tints.
-  cyanEdgeDeep: '#155e75',
+  cyanEdgeDeep: '#005c55',
   // Near-black text on a solid warning-500 fill (e.g. "Apply all"), where both white
   // and the normal text colour fail contrast.
   warningText: '#1a1400',
-  gradient: [palette.brand[500], palette.violet[500]] as const,
+  gradient: [palette.brand[700], palette.brand[500]] as const,
 } as const
 
 // THE RULE: text on a tinted feedback surface must clear WCAG AA (4.5:1) against that
@@ -101,7 +101,7 @@ export const semanticInk = {
 
 export type SemanticTone = keyof typeof semanticInk['light']
 
-export const GRADIENT_CSS = `linear-gradient(135deg, ${palette.brand[500]} 0%, ${palette.violet[500]} 100%)`
+export const GRADIENT_CSS = `linear-gradient(135deg, ${palette.brand[700]} 0%, ${palette.brand[500]} 100%)`
 
 // Surface tokens as the CSS custom properties web consumes. The var names are part of
 // the contract with index.css and tailwind.config.ts's `var(--...)` colour aliases —

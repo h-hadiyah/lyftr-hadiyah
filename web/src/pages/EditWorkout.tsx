@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Plus, ArrowLeft, Trash2, AlertCircle, Dumbbell, Clock, FileText, Zap } from 'lucide-react'
 import { workoutAPI } from '../services/api'
+import { t } from '../i18n'
 import { useSettingsStore, weightShort, lbsToDisplay, displayToLbs } from '../stores/settings'
 import WeightInput from '../components/WeightInput'
 import ExercisePicker from '../components/ExercisePicker'
@@ -135,10 +136,10 @@ export default function EditWorkout() {
     return (
       <ErrorState
         size="page"
-        title="Couldn't load this workout"
-        message={loadError}
+        title={t("Couldn't load this workout")}
+        message={t(loadError)}
         onRetry={() => { setLoadError(null); setInitialLoading(true); setRetryKey(k => k + 1) }}
-        secondary={<button onClick={() => navigate('/workouts')} className="btn-secondary btn-sm">Back to workouts</button>}
+        secondary={<button onClick={() => navigate('/workouts')} className="btn-secondary btn-sm">{t('Back to workouts')}</button>}
       />
     )
   }
@@ -150,19 +151,19 @@ export default function EditWorkout() {
   return (
     <div className="space-y-6 animate-slide-up pb-10">
       <div className="flex items-center gap-3">
-        <button aria-label="Go back" onClick={() => navigate(-1)} className="p-2 hover:bg-surface-muted rounded-lg transition-colors">
+        <button aria-label={t('Go back')} onClick={() => navigate(-1)} className="p-2 hover:bg-surface-muted rounded-lg transition-colors">
           <ArrowLeft className="w-5 h-5 text-tx-muted" />
         </button>
         <div>
-          <h1 className="font-display font-bold text-2xl text-tx-primary">Edit Workout</h1>
-          <p className="text-xs text-tx-muted">{formData.exercises.length} exercise{formData.exercises.length === 1 ? '' : 's'} • {totalSets} set{totalSets === 1 ? '' : 's'}</p>
+          <h1 className="font-display font-bold text-2xl text-tx-primary">{t('Edit Workout')}</h1>
+          <p className="text-xs text-tx-muted">{t(formData.exercises.length === 1 ? '{n} exercise' : '{n} exercises', { n: formData.exercises.length })} • {t(totalSets === 1 ? '{n} set' : '{n} sets', { n: totalSets })}</p>
         </div>
       </div>
 
       {(error || save.error) && (
         <div className="alert-error">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{error || save.error}</span>
+          <span>{t(error || save.error)}</span>
         </div>
       )}
 
@@ -170,7 +171,7 @@ export default function EditWorkout() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Dumbbell className="w-4 h-4 text-brand-500" />
-            <label className="label">Workout Name</label>
+            <label className="label">{t('Workout Name')}</label>
           </div>
           <input type="text" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} className="input mt-1" />
         </div>
@@ -178,12 +179,12 @@ export default function EditWorkout() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-brand-500" />
-            <label className="label">Duration (minutes)</label>
+            <label className="label">{t('Duration (minutes)')}</label>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input type="number" value={formData.duration || ''} onChange={e => setFormData(prev => ({ ...prev, duration: Number(e.target.value) || 0 }))} placeholder="0" className="input" min="0" />
             <div className="flex items-center px-3 bg-surface-muted/30 rounded-lg text-sm text-tx-muted font-medium">
-              {Math.floor(formData.duration / 60)}h {formData.duration % 60}m
+              {t('{h}h {m}m', { h: Math.floor(formData.duration / 60), m: formData.duration % 60 })}
             </div>
           </div>
         </div>
@@ -191,16 +192,16 @@ export default function EditWorkout() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <FileText className="w-4 h-4 text-brand-500" />
-            <label className="label">Notes</label>
+            <label className="label">{t('Notes')}</label>
           </div>
           <textarea value={formData.notes} onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))} className="input mt-1 min-h-20 resize-none" />
         </div>
 
         {formData.exercises.length > 0 && (
           <div className="grid grid-cols-3 gap-2 p-3 bg-brand-500/10 border border-brand-500/20 rounded-lg">
-            <div className="text-center"><div className="text-sm font-bold text-brand-500">{formData.exercises.length}</div><div className="text-xs text-tx-muted">Exercises</div></div>
-            <div className="text-center"><div className="text-sm font-bold text-brand-500">{totalSets}</div><div className="text-xs text-tx-muted">Sets</div></div>
-            <div className="text-center"><div className="text-sm font-bold text-brand-500">{Math.round(totalWeight)}</div><div className="text-xs text-tx-muted">Total {wUnit}</div></div>
+            <div className="text-center"><div className="text-sm font-bold text-brand-500">{formData.exercises.length}</div><div className="text-xs text-tx-muted">{t('Exercises')}</div></div>
+            <div className="text-center"><div className="text-sm font-bold text-brand-500">{totalSets}</div><div className="text-xs text-tx-muted">{t('Sets')}</div></div>
+            <div className="text-center"><div className="text-sm font-bold text-brand-500">{Math.round(totalWeight)}</div><div className="text-xs text-tx-muted">{t('Total {unit}', { unit: wUnit })}</div></div>
           </div>
         )}
 
@@ -208,11 +209,11 @@ export default function EditWorkout() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-brand-500" />
-              <label className="label">Exercises</label>
+              <label className="label">{t('Exercises')}</label>
             </div>
             <button type="button" onClick={() => setShowPicker(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-brand-500 hover:bg-brand-600 text-white rounded-lg transition-colors font-medium">
               <Plus className="w-3.5 h-3.5" />
-              Add Exercise
+              {t('Add Exercise')}
             </button>
           </div>
 
@@ -231,38 +232,38 @@ export default function EditWorkout() {
                         </div>
                         <p className="font-semibold text-tx-primary">{exercise?.name}</p>
                       </div>
-                      <p className="text-xs text-tx-muted ml-8">{exercise?.muscle_group} • {exercise?.equipment}</p>
+                      <p className="text-xs text-tx-muted ms-8">{t(exercise?.muscle_group ?? '')} • {t(exercise?.equipment ?? '')}</p>
                     </div>
-                    <button type="button" aria-label="Remove exercise" onClick={() => removeExercise(exIdx)} className="p-1.5 hover:bg-error-500/20 rounded transition-colors flex-shrink-0">
+                    <button type="button" aria-label={t('Remove exercise')} onClick={() => removeExercise(exIdx)} className="p-1.5 hover:bg-error-500/20 rounded transition-colors flex-shrink-0">
                       <Trash2 className="w-4 h-4 text-error-400" />
                     </button>
                   </div>
 
                   <div className="mb-4">
-                    <label className="text-xs text-tx-muted font-medium uppercase tracking-wider block mb-1">Notes</label>
+                    <label className="text-xs text-tx-muted font-medium uppercase tracking-wider block mb-1">{t('Notes')}</label>
                     <input type="text" value={workoutEx.notes} onChange={e => { const ex = [...formData.exercises]; ex[exIdx].notes = e.target.value; setFormData(p => ({ ...p, exercises: ex })) }} className="input text-sm" />
                   </div>
 
                   <div className="space-y-2 mb-3">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs text-tx-muted font-medium uppercase tracking-wider">Sets</label>
-                      <span className="text-xs text-tx-muted">{workoutEx.sets.length} set{workoutEx.sets.length === 1 ? '' : 's'}</span>
+                      <label className="text-xs text-tx-muted font-medium uppercase tracking-wider">{t('Sets')}</label>
+                      <span className="text-xs text-tx-muted">{t(workoutEx.sets.length === 1 ? '{n} set' : '{n} sets', { n: workoutEx.sets.length })}</span>
                     </div>
                     {workoutEx.sets.map((set, setIdx) => (
                       <div key={setIdx} className="flex gap-2 items-end bg-surface-raised/40 p-3 rounded-lg border border-surface-border/50">
                         <div className="flex-shrink-0 w-12">
-                          <label className="text-xs text-tx-muted font-medium uppercase tracking-wider block">Set</label>
+                          <label className="text-xs text-tx-muted font-medium uppercase tracking-wider block">{t('Set')}</label>
                           <div className="text-sm font-bold text-tx-primary bg-surface-muted px-2 py-1 rounded text-center">{set.set_number}</div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <label className="text-xs text-tx-muted font-medium uppercase tracking-wider block mb-1">Reps</label>
+                          <label className="text-xs text-tx-muted font-medium uppercase tracking-wider block mb-1">{t('Reps')}</label>
                           <input type="number" inputMode="numeric" value={set.reps || ''} onChange={e => updateSet(exIdx, setIdx, 'reps', e.target.value)} placeholder="10" className="input text-sm w-full" min="0" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <label className="text-xs text-tx-muted font-medium uppercase tracking-wider block mb-1">Weight</label>
+                          <label className="text-xs text-tx-muted font-medium uppercase tracking-wider block mb-1">{t('Weight')}</label>
                           <WeightInput size="sm" value={set.weight ? String(set.weight) : ''} onChange={v => updateSet(exIdx, setIdx, 'weight', v)} unit={wUnit} placeholder="225" />
                         </div>
-                        <button type="button" aria-label="Remove set" onClick={() => removeSet(exIdx, setIdx)} className="p-2 hover:bg-error-500/20 rounded transition-colors flex-shrink-0">
+                        <button type="button" aria-label={t('Remove set')} onClick={() => removeSet(exIdx, setIdx)} className="p-2 hover:bg-error-500/20 rounded transition-colors flex-shrink-0">
                           <Trash2 className="w-4 h-4 text-error-400" />
                         </button>
                       </div>
@@ -271,7 +272,7 @@ export default function EditWorkout() {
 
                   <button type="button" onClick={() => addSet(exIdx)} className="flex items-center gap-1 text-xs text-brand-400 hover:text-brand-300 font-medium transition-colors">
                     <Plus className="w-3.5 h-3.5" />
-                    Add Set
+                    {t('Add Set')}
                   </button>
                 </div>
               )
@@ -281,11 +282,11 @@ export default function EditWorkout() {
 
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={() => navigate(-1)} className="flex-1 px-4 py-3 bg-surface-muted hover:bg-surface-muted/80 text-tx-secondary rounded-lg transition-colors font-medium">
-            Cancel
+            {t('Cancel')}
           </button>
           <button type="submit" disabled={save.busy} className="flex-1 px-4 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
             <Dumbbell className="w-4 h-4" />
-            {save.busy ? 'Saving…' : 'Save Changes'}
+            {save.busy ? t('Saving…') : t('Save Changes')}
           </button>
         </div>
       </form>

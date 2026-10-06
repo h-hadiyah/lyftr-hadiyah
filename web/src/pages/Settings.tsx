@@ -11,6 +11,8 @@ import { ErrorState } from '../components/ui'
 import { ConfirmSheet } from '../components/ui'
 import ServerSettings from '../components/ServerSettings'
 import { Link } from 'react-router-dom'
+import SegmentedControl from '../components/ui/SegmentedControl'
+import { t, lang, setLang, dateLocale, type Lang } from '../i18n'
 import {
   Moon, Sun, LogOut, Trash2, Check, AlertCircle, Loader,
   RefreshCw, Pencil, Clock, Minus, Plus, KeyRound,
@@ -26,7 +28,7 @@ import {
 //
 // Stacking everything below `sm` fixed that and overcorrected: a compact control like the
 // theme toggle got dropped onto its own line too, for no gain, and the page grew to a
-// ~2800px scroll on a phone. `flex-wrap` asks the right question instead — does this
+// ~2800px scroll on a phone. `flex-wrap` asks the end question instead — does this
 // particular value fit beside its label? A toggle does and stays inline; an email address
 // does not and takes the next line at full width. No breakpoint decides it, so the row is
 // right at any width and for any content.
@@ -120,7 +122,7 @@ export default function Settings() {
         fat_target: s.fat_target,
       })
     } catch (err: any) {
-      setError(apiErrorMessage(err, "The server didn't say what went wrong."))
+      setError(t(apiErrorMessage(err, "The server didn't say what went wrong.")))
     } finally {
       setLoading(false)
     }
@@ -139,10 +141,10 @@ export default function Settings() {
     setSeedMsg(null)
     try {
       const res = await exerciseAPI.refreshCache()
-      setSeedMsg({ text: `Refreshed ${res.refreshed.toLocaleString()} exercise${res.refreshed === 1 ? '' : 's'}`, failed: false })
+      setSeedMsg({ text: t(res.refreshed === 1 ? 'Refreshed {n} exercise' : 'Refreshed {n} exercises', { n: res.refreshed.toLocaleString(dateLocale) }), failed: false })
       loadCacheStatus()
     } catch (err: any) {
-      setSeedMsg({ text: apiErrorMessage(err, "Couldn't refresh the cache."), failed: true })
+      setSeedMsg({ text: t(apiErrorMessage(err, "Couldn't refresh the cache.")), failed: true })
     } finally {
       setSeedAction(null)
     }
@@ -153,10 +155,10 @@ export default function Settings() {
     setSeedMsg(null)
     try {
       const res = await exerciseAPI.clearCacheOnServer()
-      setSeedMsg({ text: `Cleared ${res.cleared.toLocaleString()} unused exercises`, failed: false })
+      setSeedMsg({ text: t('Cleared {n} unused exercises', { n: res.cleared.toLocaleString(dateLocale) }), failed: false })
       loadCacheStatus()
     } catch (err) {
-      setSeedMsg({ text: apiErrorMessage(err, "Couldn't clear the cache."), failed: true })
+      setSeedMsg({ text: t(apiErrorMessage(err, "Couldn't clear the cache.")), failed: true })
     } finally {
       setSeedAction(null)
     }
@@ -176,7 +178,7 @@ export default function Settings() {
       await updateSettings({ ...formData, weight_unit: unit })
     } catch (err) {
       setFormData(prev => ({ ...prev, weight_unit: previous }))
-      setUnitError(apiErrorMessage(err, "Couldn't change the weight unit."))
+      setUnitError(t(apiErrorMessage(err, "Couldn't change the weight unit.")))
     }
   }
 
@@ -216,52 +218,60 @@ export default function Settings() {
 
   return (
     <div className="space-y-5 animate-slide-up max-w-2xl">
-      <PageHeader title="Settings" subtitle="Preferences and account configuration" />
+      <PageHeader title={t('Settings')} subtitle={t('Preferences and account configuration')} />
 
       {(error || save.error) && (
         <div className="alert-error">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <span>{error || save.error}</span>
+          <span>{t(error || save.error || '')}</span>
         </div>
       )}
 
       {success && (
         <div className="alert-success">
           <Check className="w-5 h-5 flex-shrink-0" />
-          <span>Settings saved successfully</span>
+          <span>{t('Settings saved successfully')}</span>
         </div>
       )}
 
       {/* Account */}
-      <Section title="Account">
-        <SettingRow label="Email" description="Your login email address">
+      <Section title={t('Account')}>
+        <SettingRow label={t('Email')} description={t('Your login email address')}>
           <span className="text-sm text-tx-muted font-mono">{user?.email}</span>
         </SettingRow>
-        <SettingRow label="Member since">
-          <span className="text-sm text-tx-muted">{memberSince(user?.created_at)}</span>
+        <SettingRow label={t('Member since')}>
+          <span className="text-sm text-tx-muted">{memberSince(user?.created_at) === '—' ? '—' : new Date(user!.created_at).toLocaleDateString(dateLocale, { month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
         </SettingRow>
-        <SettingRow label="Password" description="Changing it signs you out on your other devices">
+        <SettingRow label={t('Password')} description={t('Changing it signs you out on your other devices')}>
           <Link to="/settings/password" className="btn-secondary btn-sm">
-            <KeyRound className="w-3.5 h-3.5" /> Change
+            <KeyRound className="w-3.5 h-3.5" /> {t('Change')}
           </Link>
         </SettingRow>
       </Section>
 
       {/* Appearance */}
-      <Section title="Appearance">
-        <SettingRow label="Theme" description="Interface color scheme">
+      <Section title={t('Appearance')}>
+        <SettingRow label={t('Language')} description={t('Interface language')}>
+          <SegmentedControl<Lang>
+            size="sm"
+            options={[{ value: 'ar', label: 'العربية' }, { value: 'en', label: 'English' }]}
+            value={lang}
+            onChange={v => { if (v !== lang) setLang(v) }}
+          />
+        </SettingRow>
+        <SettingRow label={t('Theme')} description={t('Interface color scheme')}>
           <button onClick={toggleTheme} className="btn-secondary btn-sm">
             {theme === 'dark'
-              ? <><Moon className="w-3.5 h-3.5" /> Dark</>
-              : <><Sun className="w-3.5 h-3.5" /> Light</>
+              ? <><Moon className="w-3.5 h-3.5" /> {t('Dark')}</>
+              : <><Sun className="w-3.5 h-3.5" /> {t('Light')}</>
             }
           </button>
         </SettingRow>
       </Section>
 
       {/* Workout */}
-      <Section title="Workout">
-        <SettingRow label="Active workout layout" description="How exercises are shown during a workout">
+      <Section title={t('Workout')}>
+        <SettingRow label={t('Active workout layout')} description={t('How exercises are shown during a workout')}>
           <div className="flex gap-1 bg-surface-overlay rounded-lg p-1 border border-surface-border">
             {(['list', 'gym'] as const).map(mode => (
               <button
@@ -273,13 +283,13 @@ export default function Settings() {
                     : 'text-tx-muted hover:text-tx-primary'
                 }`}
               >
-                {mode === 'list' ? 'List' : 'Gym Mode'}
+                {mode === 'list' ? t('List') : t('Gym Mode')}
               </button>
             ))}
           </div>
         </SettingRow>
 
-        <SettingRow label="Rest timer" description="Auto-start a countdown between sets in gym mode">
+        <SettingRow label={t('Rest timer')} description={t('Auto-start a countdown between sets in gym mode')}>
           <div className="flex gap-1 bg-surface-overlay rounded-lg p-1 border border-surface-border">
             {([['Off', false], ['On', true]] as const).map(([label, val]) => (
               <button
@@ -291,7 +301,7 @@ export default function Settings() {
                     : 'text-tx-muted hover:text-tx-primary'
                 }`}
               >
-                {label}
+                {t(label)}
               </button>
             ))}
           </div>
@@ -309,23 +319,23 @@ export default function Settings() {
             }`
           return (
             <div className={`py-4 transition-opacity ${enabled ? '' : 'opacity-40 pointer-events-none select-none'}`} aria-disabled={!enabled}>
-              <p className="text-sm font-medium text-tx-primary">Default rest</p>
-              <p className="text-xs text-tx-muted mt-0.5 mb-3">Seeds new exercises · per-exercise rest overrides it</p>
+              <p className="text-sm font-medium text-tx-primary">{t('Default rest')}</p>
+              <p className="text-xs text-tx-muted mt-0.5 mb-3">{t('Seeds new exercises · per-exercise rest overrides it')}</p>
               <div className="flex rounded-xl border border-surface-border overflow-hidden divide-x divide-surface-border">
                 {presets.map(sec => (
                   <button key={sec} disabled={!enabled} onClick={() => { setShowCustomRest(false); setRestSeconds(sec) }} className={seg(!customActive && cur === sec)}>
                     <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="text-[11px] font-semibold leading-none">{sec}s</span>
+                    <span className="text-[11px] font-semibold leading-none">{t('{n}s', { n: sec })}</span>
                   </button>
                 ))}
                 <button disabled={!enabled} onClick={() => setShowCustomRest(true)} className={seg(customActive)}>
                   <Pencil className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="text-[11px] font-semibold leading-none">{isCustom ? `${cur}s` : 'Custom'}</span>
+                  <span className="text-[11px] font-semibold leading-none">{isCustom ? t('{n}s', { n: cur }) : t('Custom')}</span>
                 </button>
               </div>
               {customActive && (
                 <div className="flex items-center justify-center gap-2 mt-3">
-                  <button type="button" disabled={!enabled} aria-label="−5 seconds" onClick={() => setRestSeconds(Math.max(0, cur - 5))}
+                  <button type="button" disabled={!enabled} aria-label={t('−5 seconds')} onClick={() => setRestSeconds(Math.max(0, cur - 5))}
                     className="p-2.5 rounded-xl bg-surface-muted border border-surface-border text-tx-secondary active:scale-95 hover:text-tx-primary">
                     <Minus className="w-4 h-4" />
                   </button>
@@ -337,12 +347,12 @@ export default function Settings() {
                       disabled={!enabled}
                       value={cur}
                       onChange={e => setRestSeconds(Math.max(0, Math.min(3600, Number(e.target.value) || 0)))}
-                      className="input w-28 text-center py-2.5 pr-9 text-base font-semibold tabular-nums"
-                      aria-label="Custom rest seconds"
+                      className="input w-28 text-center py-2.5 pe-9 text-base font-semibold tabular-nums"
+                      aria-label={t('Custom rest seconds')}
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-tx-muted pointer-events-none">sec</span>
+                    <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-tx-muted pointer-events-none">{t('sec')}</span>
                   </div>
-                  <button type="button" disabled={!enabled} aria-label="+5 seconds" onClick={() => setRestSeconds(Math.min(3600, cur + 5))}
+                  <button type="button" disabled={!enabled} aria-label={t('+5 seconds')} onClick={() => setRestSeconds(Math.min(3600, cur + 5))}
                     className="p-2.5 rounded-xl bg-surface-muted border border-surface-border text-tx-secondary active:scale-95 hover:text-tx-primary">
                     <Plus className="w-4 h-4" />
                   </button>
@@ -365,19 +375,19 @@ export default function Settings() {
           defaults, so the inputs showed 2000/150/250/65 and Save PUT them over real
           targets of 3175/205/310/88. Measured, not theorised. */}
       {settingsLoadFailed ? (
-        <Section title="Goals & Units">
+        <Section title={t('Goals & Units')}>
           <ErrorState
             size="section"
-            title="Couldn't load your goals"
-            message="These are your saved targets and units, so we won't guess at them. Everything else on this page still works."
+            title={t("Couldn't load your goals")}
+            message={t("These are your saved targets and units, so we won't guess at them. Everything else on this page still works.")}
             onRetry={() => { void load() }}
           />
         </Section>
       ) : (
-      <Section title="Goals & Units">
+      <Section title={t('Goals & Units')}>
         <SettingRow
-          label="Weight unit"
-          description={unitError ?? 'Changes apply immediately across the app'}
+          label={t('Weight unit')}
+          description={unitError ?? t('Changes apply immediately across the app')}
           descriptionTone={unitError ? 'error' : undefined}
         >
           <div className="flex gap-1 bg-surface-overlay rounded-lg p-1 border border-surface-border">
@@ -391,81 +401,81 @@ export default function Settings() {
                     : 'text-tx-muted hover:text-tx-primary'
                 }`}
               >
-                {unit}
+                {t(unit)}
               </button>
             ))}
           </div>
         </SettingRow>
 
-        <SettingRow label="Calorie target" description="Daily calorie goal">
+        <SettingRow label={t('Calorie target')} description={t('Daily calorie goal')}>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={formData.calorie_target}
               onChange={e => setFormData({ ...formData, calorie_target: parseInt(e.target.value) || 0 })}
-              className="input w-24 text-right"
+              className="input w-24 text-end"
               min={500}
               max={10000}
             />
-            <span className="text-xs text-tx-muted">kcal</span>
+            <span className="text-xs text-tx-muted">{t('kcal')}</span>
           </div>
         </SettingRow>
 
-        <SettingRow label="Protein target" description="Daily protein goal">
+        <SettingRow label={t('Protein target')} description={t('Daily protein goal')}>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={formData.protein_target}
               onChange={e => setFormData({ ...formData, protein_target: parseInt(e.target.value) || 0 })}
-              className="input w-24 text-right"
+              className="input w-24 text-end"
             />
-            <span className="text-xs text-tx-muted">g</span>
+            <span className="text-xs text-tx-muted">{t('g')}</span>
           </div>
         </SettingRow>
 
-        <SettingRow label="Carb target" description="Daily carb goal">
+        <SettingRow label={t('Carb target')} description={t('Daily carb goal')}>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={formData.carb_target}
               onChange={e => setFormData({ ...formData, carb_target: parseInt(e.target.value) || 0 })}
-              className="input w-24 text-right"
+              className="input w-24 text-end"
             />
-            <span className="text-xs text-tx-muted">g</span>
+            <span className="text-xs text-tx-muted">{t('g')}</span>
           </div>
         </SettingRow>
 
-        <SettingRow label="Fat target" description="Daily fat goal">
+        <SettingRow label={t('Fat target')} description={t('Daily fat goal')}>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={formData.fat_target}
               onChange={e => setFormData({ ...formData, fat_target: parseInt(e.target.value) || 0 })}
-              className="input w-24 text-right"
+              className="input w-24 text-end"
             />
-            <span className="text-xs text-tx-muted">g</span>
+            <span className="text-xs text-tx-muted">{t('g')}</span>
           </div>
         </SettingRow>
 
         <div className="py-3 flex items-center justify-between">
-          <p className="text-xs text-tx-muted">Save calorie and macro targets</p>
+          <p className="text-xs text-tx-muted">{t('Save calorie and macro targets')}</p>
           <button
             onClick={handleSave}
             disabled={save.busy}
             className="btn-primary btn-sm"
           >
-            <Check className="w-3.5 h-3.5" /> {save.busy ? 'Saving...' : 'Save targets'}
+            <Check className="w-3.5 h-3.5" /> {save.busy ? t('Saving...') : t('Save targets')}
           </button>
         </div>
       </Section>
       )}
 
       {/* Server info */}
-      <Section title="Self-Hosted Instance">
-        <SettingRow label="API server" description="Backend server this client is connected to">
+      <Section title={t('Self-Hosted Instance')}>
+        <SettingRow label={t('API server')} description={t('Backend server this client is connected to')}>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-success-500 flex-shrink-0" />
-            <span className="text-xs font-mono text-tx-muted">{serverUrl || 'This site (reverse proxy)'}</span>
+            <span className="text-xs font-mono text-tx-muted">{serverUrl || t('This site (reverse proxy)')}</span>
           </div>
         </SettingRow>
         {/* #17: same Server Settings editor as the sign-in screens, so a logged-in
@@ -473,22 +483,22 @@ export default function Settings() {
         <div className="py-2">
           <ServerSettings />
         </div>
-        <SettingRow label="Database" description="Storage backend">
+        <SettingRow label={t('Database')} description={t('Storage backend')}>
           <span className="badge-dim">SQLite</span>
         </SettingRow>
-        <SettingRow label="Version" description="lyftr backend version">
+        <SettingRow label={t('Version')} description={t('lyftr backend version')}>
           <span className="text-xs text-tx-muted font-mono">{serverInfo?.version || '—'}</span>
         </SettingRow>
       </Section>
 
       {/* Exercise Library */}
-      <Section title="Exercise Library">
+      <Section title={t('Exercise Library')}>
         <SettingRow
-          label="Exercise database"
-          description="Exercises come from open-exercise-db, queried as you search. This server keeps a copy of the ones it has shown."
+          label={t('Exercise database')}
+          description={t('Exercises come from open-exercise-db, queried as you search. This server keeps a copy of the ones it has shown.')}
         >
           <span className="text-sm font-mono text-tx-muted">
-            {cacheStatus ? cacheStatus.count.toLocaleString() : '—'} cached
+            {t('{n} cached', { n: cacheStatus ? cacheStatus.count.toLocaleString(dateLocale) : '—' })}
           </span>
         </SettingRow>
 
@@ -507,8 +517,8 @@ export default function Settings() {
             className="btn-secondary btn-sm"
           >
             {seedAction === 'refresh'
-              ? <><Loader className="w-3.5 h-3.5 animate-spin" /> Refreshing...</>
-              : <><RefreshCw className="w-3.5 h-3.5" /> Refresh cached</>
+              ? <><Loader className="w-3.5 h-3.5 animate-spin" /> {t('Refreshing...')}</>
+              : <><RefreshCw className="w-3.5 h-3.5" /> {t('Refresh cached')}</>
             }
           </button>
           <button
@@ -517,23 +527,23 @@ export default function Settings() {
             className="btn-secondary btn-sm"
           >
             {seedAction === 'clear'
-              ? <><Loader className="w-3.5 h-3.5 animate-spin" /> Clearing...</>
-              : <><Trash2 className="w-3.5 h-3.5" /> Clear unused</>
+              ? <><Loader className="w-3.5 h-3.5 animate-spin" /> {t('Clearing...')}</>
+              : <><Trash2 className="w-3.5 h-3.5" /> {t('Clear unused')}</>
             }
           </button>
         </div>
       </Section>
 
       {/* Danger Zone */}
-      <Section title="Danger Zone">
-        <SettingRow label="Sign out" description="Log out of this device">
+      <Section title={t('Danger Zone')}>
+        <SettingRow label={t('Sign out')} description={t('Log out of this device')}>
           <button onClick={() => logout()} className="btn-secondary btn-sm">
-            <LogOut className="w-3.5 h-3.5" /> Sign out
+            <LogOut className="w-3.5 h-3.5" /> {t('Sign out')}
           </button>
         </SettingRow>
-        <SettingRow label="Delete account" description="Permanently delete all your data">
+        <SettingRow label={t('Delete account')} description={t('Permanently delete all your data')}>
           <button onClick={() => setConfirmDelete(true)} className="btn-danger btn-sm">
-            <Trash2 className="w-3.5 h-3.5" /> Delete
+            <Trash2 className="w-3.5 h-3.5" /> {t('Delete')}
           </button>
         </SettingRow>
       </Section>
@@ -544,12 +554,12 @@ export default function Settings() {
         open={confirmDelete}
         icon={Trash2}
         destructive
-        title="Delete account?"
-        message="This permanently deletes your account and all of your data. This can't be undone."
-        confirmLabel="Delete account"
-        busyLabel="Deleting…"
+        title={t('Delete account?')}
+        message={t("This permanently deletes your account and all of your data. This can't be undone.")}
+        confirmLabel={t('Delete account')}
+        busyLabel={t('Deleting…')}
         busy={deleteAccount.busy}
-        error={deleteAccount.error ?? undefined}
+        error={deleteAccount.error ? t(deleteAccount.error) : undefined}
         onConfirm={() => { void deleteAccount.run() }}
         onCancel={() => { setConfirmDelete(false); deleteAccount.reset() }}
       />

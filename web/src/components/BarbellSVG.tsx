@@ -9,8 +9,8 @@ import { BARBELL } from '@lyftr/shared'
 // in currentColor) and the error state (muted, so it reads as a state and not as branding).
 const DEFAULT_INK: Record<BarbellInk, string> = {
   bar: 'currentColor',
-  plate: '#00b8d9',
-  plateEdge: '#0891b2',
+  plate: '#00A195',
+  plateEdge: '#00746B',
   highlight: '#7eeeff',
   collar: '#475569',
 }

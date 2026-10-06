@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Barcode } from 'lucide-react'
 import { eanModules, formatBarcode } from '@lyftr/shared'
+import { t } from '../i18n'
 
 // When a lookup has run this long, say so: the silence past this point is what made
 // people rescan (#164). Open Food Facts routinely takes a few seconds.
@@ -33,8 +34,8 @@ function Bars({ code }: { code: string }) {
 export default function BarcodeLookup({ code }: { code: string }) {
   const [slow, setSlow] = useState(false)
   useEffect(() => {
-    const t = setTimeout(() => setSlow(true), SLOW_AFTER_MS)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setSlow(true), SLOW_AFTER_MS)
+    return () => clearTimeout(timer)
   }, [])
 
   return (
@@ -47,7 +48,7 @@ export default function BarcodeLookup({ code }: { code: string }) {
         {formatBarcode(code)}
       </p>
       <p className="mt-3 text-sm text-tx-muted">
-        {slow ? 'Still looking. This can take a few seconds.' : 'Looking up this product…'}
+        {slow ? t('Still looking. This can take a few seconds.') : t('Looking up this product…')}
       </p>
     </div>
   )

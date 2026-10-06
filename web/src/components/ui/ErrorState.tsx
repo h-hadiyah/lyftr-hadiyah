@@ -1,6 +1,7 @@
 import type React from 'react'
 import { RotateCw } from 'lucide-react'
 import BarbellBrokenSVG from '../BarbellBrokenSVG'
+import { t } from '../../i18n'
 
 // A load that failed, said as a state rather than as a banner over the wreckage.
 //
@@ -37,7 +38,7 @@ export default function ErrorState({
   message,
   size = 'section',
   onRetry,
-  retryLabel = 'Try again',
+  retryLabel = t('Try again'),
   secondary,
 }: Props) {
   const page = size === 'page'
@@ -58,9 +59,10 @@ export default function ErrorState({
       />
       <div className="space-y-1 max-w-sm">
         <p className={`font-display font-bold text-tx-primary ${page ? 'text-xl' : 'text-base'}`}>
-          {title}
+          {t(title)}
         </p>
-        <p className="text-sm text-tx-muted leading-relaxed text-pretty">{message}</p>
+        {/* Messages are often API errors in English; t() is a no-op on already-translated copy. */}
+        <p className="text-sm text-tx-muted leading-relaxed text-pretty">{t(message)}</p>
       </div>
       {(onRetry || secondary) && (
         <div className="flex flex-wrap items-center justify-center gap-2 mt-1">

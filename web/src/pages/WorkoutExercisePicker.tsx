@@ -6,6 +6,7 @@ import { ListError } from '../components/ui'
 import { exerciseAPI } from '../services/api'
 import { useWorkoutSession } from '../stores/workoutSession'
 import { muscleColorBordered, EQUIPMENT_LABEL } from '../utils/exerciseUtils'
+import { t } from '../i18n'
 
 // Must match the server's default page size: a short page is what signals the end.
 const PAGE_SIZE = 50
@@ -18,8 +19,8 @@ export default function WorkoutExercisePicker() {
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedQuery(query), DEBOUNCE_MS)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setDebouncedQuery(query), DEBOUNCE_MS)
+    return () => clearTimeout(timer)
   }, [query])
 
   const selectedIds = session?.exercises.map(e => e.exercise_id) ?? []
@@ -69,21 +70,21 @@ export default function WorkoutExercisePicker() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-shrink-0">
         <button
-          aria-label="Back to workout"
+          aria-label={t('Back to workout')}
           onClick={() => navigate('/workout/active')}
           className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-tx-muted" />
         </button>
         <div>
-          <h1 className="font-display font-bold text-xl text-tx-primary">Add Exercise</h1>
+          <h1 className="font-display font-bold text-xl text-tx-primary">{t('Add Exercise')}</h1>
           {/* Derived from the rows we actually hold, so it is only true if the fetch
               landed. On a failure `available` is empty and this read "0 loaded" directly
               above a message saying we could not load anything — the same claim the
               error state exists to stop. */}
           {!error && (
             <p className="text-xs text-tx-muted">
-              {available.length} loaded{hasMore ? '…' : ''}
+              {t('{n} loaded', { n: available.length })}{hasMore ? '…' : ''}
             </p>
           )}
         </div>
@@ -91,13 +92,13 @@ export default function WorkoutExercisePicker() {
 
       {/* Search */}
       <div className="relative mb-3 flex-shrink-0">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tx-muted pointer-events-none" />
+        <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tx-muted pointer-events-none" />
         <input
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Search exercises…"
-          className="input pl-10 w-full"
+          placeholder={t('Search exercises…')}
+          className="input ps-10 w-full"
           autoFocus
         />
       </div>
@@ -106,19 +107,19 @@ export default function WorkoutExercisePicker() {
       <div className="flex-1 overflow-y-auto -mx-4 px-4">
         {initialLoading ? (
           <div className="flex items-center justify-center py-12 text-tx-muted text-sm">
-            <Dumbbell className="w-5 h-5 mr-2 animate-pulse text-brand-500" />
-            Loading…
+            <Dumbbell className="w-5 h-5 me-2 animate-pulse text-brand-500" />
+            {t('Loading…')}
           </div>
         ) : available.length === 0 ? (
           // "No exercises found" is only true if we heard back. On a failed fetch it
           // reads as an empty catalogue rather than a connection that dropped.
           error ? (
             <div className="py-4">
-              <ListError subject="these exercises" message={error} onRetry={retry} />
+              <ListError subject={t('these exercises')} message={t(error)} onRetry={retry} />
             </div>
           ) : (
             <div className="flex items-center justify-center py-12 text-tx-muted text-sm">
-              No exercises found
+              {t('No exercises found')}
             </div>
           )
         ) : (
@@ -127,7 +128,7 @@ export default function WorkoutExercisePicker() {
               <button
                 key={ex.id}
                 onClick={() => handleSelect(ex)}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-surface-muted transition-colors text-left"
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-surface-muted transition-colors text-start"
               >
                 {ex.image_url ? (
                   <img
@@ -146,11 +147,11 @@ export default function WorkoutExercisePicker() {
                   <p className="text-sm font-medium text-tx-primary truncate">{ex.name}</p>
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium border ${muscleColorBordered(ex.muscle_group)}`}>
-                      {ex.muscle_group}
+                      {t(ex.muscle_group)}
                     </span>
                     {ex.equipment && ex.equipment !== 'other' && (
                       <span className="text-xs text-tx-muted">
-                        {EQUIPMENT_LABEL[ex.equipment] || ex.equipment}
+                        {t(EQUIPMENT_LABEL[ex.equipment] || ex.equipment)}
                       </span>
                     )}
                   </div>
@@ -164,7 +165,7 @@ export default function WorkoutExercisePicker() {
                 disabled={loading}
                 className="btn-secondary btn-sm w-full my-3"
               >
-                {loading ? 'Loading…' : 'Load more'}
+                {loading ? t('Loading…') : t('Load more')}
               </button>
             )}
           </div>

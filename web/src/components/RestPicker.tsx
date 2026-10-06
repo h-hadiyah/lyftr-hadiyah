@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Clock, TimerOff, Pencil, Minus, Plus } from 'lucide-react'
+import { t } from '../i18n'
 
 interface Props {
   value: number
@@ -8,11 +9,11 @@ interface Props {
 
 const PRESETS = [0, 60, 90, 120, 180]
 const SEGMENTS = [
-  { v: 0, label: 'Off', Icon: TimerOff },
-  { v: 60, label: '60s', Icon: Clock },
-  { v: 90, label: '90s', Icon: Clock },
-  { v: 120, label: '120s', Icon: Clock },
-  { v: 180, label: '180s', Icon: Clock },
+  { v: 0, label: t('Off'), Icon: TimerOff },
+  { v: 60, label: t('{n}s', { n: 60 }), Icon: Clock },
+  { v: 90, label: t('{n}s', { n: 90 }), Icon: Clock },
+  { v: 120, label: t('{n}s', { n: 120 }), Icon: Clock },
+  { v: 180, label: t('{n}s', { n: 180 }), Icon: Clock },
 ]
 
 // Per-exercise rest control: one connected segmented bar (Off · presets · Custom),
@@ -38,12 +39,12 @@ export default function RestPicker({ value, onChange }: Props) {
         ))}
         <button type="button" onClick={() => setShowCustom(true)} className={seg(customActive)}>
           <Pencil className="w-3.5 h-3.5 flex-shrink-0" />
-          <span className="text-[11px] font-semibold leading-none">{isCustom ? `${value}s` : 'Custom'}</span>
+          <span className="text-[11px] font-semibold leading-none">{isCustom ? t('{n}s', { n: value }) : t('Custom')}</span>
         </button>
       </div>
       {customActive && (
         <div className="flex items-center justify-center gap-2 mt-3">
-          <button type="button" aria-label="−5 seconds" onClick={() => onChange(Math.max(0, value - 5))}
+          <button type="button" aria-label={t('−5 seconds')} onClick={() => onChange(Math.max(0, value - 5))}
             className="p-2.5 rounded-xl bg-surface-muted border border-surface-border text-tx-secondary active:scale-95 hover:text-tx-primary">
             <Minus className="w-4 h-4" />
           </button>
@@ -54,12 +55,12 @@ export default function RestPicker({ value, onChange }: Props) {
               max={3600}
               value={value}
               onChange={e => onChange(Math.max(0, Math.min(3600, Number(e.target.value) || 0)))}
-              className="input w-28 text-center py-2.5 pr-9 text-base font-semibold tabular-nums"
-              aria-label="Rest seconds"
+              className="input w-28 text-center py-2.5 pe-9 text-base font-semibold tabular-nums"
+              aria-label={t('Rest seconds')}
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-tx-muted pointer-events-none">sec</span>
+            <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-tx-muted pointer-events-none">{t('sec')}</span>
           </div>
-          <button type="button" aria-label="+5 seconds" onClick={() => onChange(Math.min(3600, value + 5))}
+          <button type="button" aria-label={t('+5 seconds')} onClick={() => onChange(Math.min(3600, value + 5))}
             className="p-2.5 rounded-xl bg-surface-muted border border-surface-border text-tx-secondary active:scale-95 hover:text-tx-primary">
             <Plus className="w-4 h-4" />
           </button>

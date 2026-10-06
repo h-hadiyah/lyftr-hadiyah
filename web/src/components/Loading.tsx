@@ -1,3 +1,5 @@
+import { t } from '../i18n'
+
 export default function Loading() {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-surface-base">
@@ -5,29 +7,29 @@ export default function Loading() {
         {/* Barbell Rig */}
         <div className="relative w-56 h-24">
           {/* Left upright */}
-          <div className="absolute left-4 top-0 bottom-4 w-1 bg-surface-muted rounded-sm">
-            <div className="absolute -left-1 top-7 w-2.5 h-0.5 bg-surface-muted rounded-sm" />
-            <div className="absolute -left-1 top-12 w-2.5 h-0.5 bg-surface-muted rounded-sm" />
+          <div className="absolute start-4 top-0 bottom-4 w-1 bg-surface-muted rounded-sm">
+            <div className="absolute -start-1 top-7 w-2.5 h-0.5 bg-surface-muted rounded-sm" />
+            <div className="absolute -start-1 top-12 w-2.5 h-0.5 bg-surface-muted rounded-sm" />
           </div>
 
           {/* Right upright */}
-          <div className="absolute right-4 top-0 bottom-4 w-1 bg-surface-muted rounded-sm">
-            <div className="absolute -right-1 top-7 w-2.5 h-0.5 bg-surface-muted rounded-sm" />
-            <div className="absolute -right-1 top-12 w-2.5 h-0.5 bg-surface-muted rounded-sm" />
+          <div className="absolute end-4 top-0 bottom-4 w-1 bg-surface-muted rounded-sm">
+            <div className="absolute -end-1 top-7 w-2.5 h-0.5 bg-surface-muted rounded-sm" />
+            <div className="absolute -end-1 top-12 w-2.5 h-0.5 bg-surface-muted rounded-sm" />
           </div>
 
           {/* Bar assembly - pivots and flexes */}
           <div
-            className="absolute left-1/2 top-7 -translate-x-1/2"
+            className="absolute start-1/2 top-7 -translate-x-1/2"
             style={{
               animation: 'pivot 1.6s cubic-bezier(0.5, 0, 0.5, 1) infinite',
             }}
           >
             {/* Bar with gradient */}
             <div
-              className="absolute -left-24 -top-1 w-48 h-1.5 rounded-sm shadow-lg"
+              className="absolute -start-24 -top-1 w-48 h-1.5 rounded-sm shadow-lg"
               style={{
-                background: 'linear-gradient(180deg, #38d8fb 0%, #00b8d9 60%, #007a96 100%)',
+                background: 'linear-gradient(180deg, #38d8fb 0%, #00A195 60%, #007a96 100%)',
                 boxShadow: '0 0 8px rgba(0, 184, 217, 0.35)',
                 animation: 'flex 1.6s cubic-bezier(0.5, 0, 0.5, 1) infinite',
                 transformOrigin: 'center',
@@ -36,35 +38,35 @@ export default function Loading() {
 
             {/* Left plates */}
             <div
-              className="absolute -left-28 -top-3 w-4 h-8 bg-surface-overlay border border-brand-500 rounded-sm"
+              className="absolute -start-28 -top-3 w-4 h-8 bg-surface-overlay border border-brand-500 rounded-sm"
               style={{ boxShadow: 'inset 0 0 10px rgba(0, 184, 217, 0.25)' }}
             />
             <div
-              className="absolute -left-24 -top-4 w-3.5 h-10 bg-surface-overlay border border-brand-500 rounded-sm"
+              className="absolute -start-24 -top-4 w-3.5 h-10 bg-surface-overlay border border-brand-500 rounded-sm"
               style={{ boxShadow: 'inset 0 0 10px rgba(0, 184, 217, 0.25)' }}
             />
             <div
-              className="absolute -left-20 -top-5 w-3 h-12 bg-surface-overlay border border-brand-500 rounded-sm"
+              className="absolute -start-20 -top-5 w-3 h-12 bg-surface-overlay border border-brand-500 rounded-sm"
               style={{ boxShadow: 'inset 0 0 10px rgba(0, 184, 217, 0.25)' }}
             />
 
             {/* Right plates */}
             <div
-              className="absolute -right-28 -top-3 w-4 h-8 bg-surface-overlay border border-brand-500 rounded-sm"
+              className="absolute -end-28 -top-3 w-4 h-8 bg-surface-overlay border border-brand-500 rounded-sm"
               style={{ boxShadow: 'inset 0 0 10px rgba(0, 184, 217, 0.25)' }}
             />
             <div
-              className="absolute -right-24 -top-4 w-3.5 h-10 bg-surface-overlay border border-brand-500 rounded-sm"
+              className="absolute -end-24 -top-4 w-3.5 h-10 bg-surface-overlay border border-brand-500 rounded-sm"
               style={{ boxShadow: 'inset 0 0 10px rgba(0, 184, 217, 0.25)' }}
             />
             <div
-              className="absolute -right-20 -top-5 w-3 h-12 bg-surface-overlay border border-brand-500 rounded-sm"
+              className="absolute -end-20 -top-5 w-3 h-12 bg-surface-overlay border border-brand-500 rounded-sm"
               style={{ boxShadow: 'inset 0 0 10px rgba(0, 184, 217, 0.25)' }}
             />
 
             {/* Collars */}
-            <div className="absolute -left-17 -top-2 w-1 h-5.5 bg-brand-500 rounded-sm" />
-            <div className="absolute -right-17 -top-2 w-1 h-5.5 bg-brand-500 rounded-sm" />
+            <div className="absolute -start-17 -top-2 w-1 h-5.5 bg-brand-500 rounded-sm" />
+            <div className="absolute -end-17 -top-2 w-1 h-5.5 bg-brand-500 rounded-sm" />
           </div>
         </div>
 
@@ -84,11 +86,11 @@ export default function Loading() {
 
         {/* Label */}
         <div className="text-center">
-          <div className="font-display font-extrabold text-xl text-tx-primary tracking-tight">
-            lyftr
+          <div className="font-display font-bold text-xl text-tx-primary">
+            {t('Hadiyah Fit')}
           </div>
           <div className="text-xs font-semibold text-tx-muted uppercase tracking-widest mt-2">
-            Loading
+            {t('Loading')}
           </div>
         </div>
       </div>
@@ -113,8 +115,8 @@ export default function Loading() {
             box-shadow: none;
           }
           20%, 95% {
-            background-color: #00b8d9;
-            border-color: #00b8d9;
+            background-color: #00A195;
+            border-color: #00A195;
             box-shadow: 0 0 10px rgba(0, 184, 217, 0.5);
           }
         }

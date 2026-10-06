@@ -9,11 +9,19 @@ import {
 import { programAPI } from '../services/api'
 import { useWorkoutSession } from '../stores/workoutSession'
 import { useSettingsStore, weightShort, displayWeight } from '../stores/settings'
-import { apiErrorMessage, isNotFound, useAsyncAction, types, allExercises, activeSessionExercisesForDay, dayLabel, sessionNameForDay, targetWeightLabel, restLabel } from '@lyftr/shared'
+import { apiErrorMessage, isNotFound, useAsyncAction, types, allExercises, activeSessionExercisesForDay, sessionNameForDay, targetWeightLabel } from '@lyftr/shared'
+import { t, dfLocale } from '../i18n'
 import { muscleColor } from '../utils/exerciseUtils'
 
 // Rows shown before the review banner collapses behind a "Show all" toggle (#40).
 const SUGGESTION_CAP = 3
+
+// dayLabel() from @lyftr/shared returns English; same rule, translated.
+const dayName = (d: types.ProgramDay) =>
+  d.name?.trim() || (d.is_rest_day ? t('Rest Day') : t('Day {n}', { n: d.order_index + 1 }))
+
+// restLabel() from @lyftr/shared returns English units; same rule, translated.
+const restText = (s: number) => (s % 60 === 0 && s >= 60 ? t('{n}m', { n: s / 60 }) : t('{n}s', { n: s }))
 
 export default function ProgramDetail() {
   const { id } = useParams<{ id: string }>()
@@ -105,10 +113,10 @@ export default function ProgramDetail() {
     return (
       <ErrorState
         size="page"
-        title="Couldn't load this program"
-        message={error ?? 'That program no longer exists.'}
+        title={t("Couldn't load this program")}
+        message={t(error ?? 'That program no longer exists.')}
         onRetry={error && !gone ? () => { setError(null); setRetryKey(k => k + 1) } : undefined}
-        secondary={<Link to="/programs" className="btn-secondary btn-sm">Back to programs</Link>}
+        secondary={<Link to="/programs" className="btn-secondary btn-sm">{t('Back to programs')}</Link>}
       />
     )
   }
@@ -131,18 +139,18 @@ export default function ProgramDetail() {
         const repsChanged = sr !== s.target_reps
         let oldLabel: string, newLabel: string
         if (weightChanged && repsChanged) {
-          oldLabel = `${s.target_reps} × ${targetWeightLabel(s.target_weight, wUnit)}`
-          newLabel = `${sr} × ${targetWeightLabel(sw, wUnit)}`
+          oldLabel = `${s.target_reps} × ${t(targetWeightLabel(s.target_weight, wUnit))}`
+          newLabel = `${sr} × ${t(targetWeightLabel(sw, wUnit))}`
         } else if (weightChanged) {
-          oldLabel = targetWeightLabel(s.target_weight, wUnit)
-          newLabel = targetWeightLabel(sw, wUnit)
+          oldLabel = t(targetWeightLabel(s.target_weight, wUnit))
+          newLabel = t(targetWeightLabel(sw, wUnit))
         } else {
           oldLabel = `${s.target_reps}`
-          newLabel = `${sr} reps`
+          newLabel = t('{n} reps', { n: sr })
         }
         return {
           setId: s.id as number,
-          exName: ex.exercise?.name ?? 'Exercise',
+          exName: ex.exercise?.name ?? t('Exercise'),
           setNumber: s.set_number,
           isPR: !!s.suggested_is_pr,
           oldLabel,
@@ -157,26 +165,26 @@ export default function ProgramDetail() {
       {/* Back nav */}
       <div className="flex items-center justify-between">
         <Link to="/programs" className="flex items-center gap-1.5 text-sm text-tx-muted hover:text-tx-primary transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Programs
+          <ArrowLeft className="w-4 h-4" /> {t('Programs')}
         </Link>
         <div className="flex items-center gap-1">
           <button
             onClick={handleStart}
             disabled={!selectedDay || selectedDay.is_rest_day}
-            title={selectedDay?.is_rest_day ? 'Rest day — nothing to start' : undefined}
+            title={selectedDay?.is_rest_day ? t('Rest day — nothing to start') : undefined}
             className="flex items-center gap-1.5 px-3 py-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:hover:bg-brand-500 text-white text-xs font-semibold rounded-xl transition-colors"
           >
-            <Play className="w-3.5 h-3.5" /> Start Workout
+            <Play className="w-3.5 h-3.5" /> {t('Start Workout')}
           </button>
           <button
-            aria-label="Edit program"
+            aria-label={t('Edit program')}
             onClick={() => navigate(`/programs/${program.id}/edit`)}
             className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
           >
             <Edit2 className="w-4 h-4 text-brand-500" />
           </button>
           <button
-            aria-label="Delete program"
+            aria-label={t('Delete program')}
             onClick={() => setConfirming(true)}
             className="p-2 hover:bg-error-500/10 rounded-lg transition-colors"
           >
@@ -190,12 +198,12 @@ export default function ProgramDetail() {
         open={confirming}
         icon={Trash2}
         destructive
-        title="Delete Program?"
-        message={`"${program.name}" will be permanently deleted.`}
-        confirmLabel="Delete"
-        busyLabel="Deleting…"
+        title={t('Delete Program?')}
+        message={t('"{name}" will be permanently deleted.', { name: program.name })}
+        confirmLabel={t('Delete')}
+        busyLabel={t('Deleting…')}
         busy={remove.busy}
-        error={remove.error}
+        error={t(remove.error)}
         onConfirm={() => { void remove.run() }}
         onCancel={() => { setConfirming(false); remove.reset() }}
       />
@@ -207,14 +215,14 @@ export default function ProgramDetail() {
             {suggestions.some(s => s.isPR)
               ? <Award className="w-4 h-4 text-warning-400 flex-shrink-0" />
               : <TrendingUp className="w-4 h-4 text-warning-400 flex-shrink-0" />}
-            <span className="text-sm font-semibold text-tx-primary flex-1">New targets from your last workout</span>
+            <span className="text-sm font-semibold text-tx-primary flex-1">{t('New targets from your last workout')}</span>
             <span className="text-xs font-bold text-warning-400 bg-warning-500/15 px-2 py-0.5 rounded-full tabular-nums">{suggestions.length}</span>
           </div>
           {(showAllSuggestions ? suggestions : suggestions.slice(0, SUGGESTION_CAP)).map(sg => (
             <div key={sg.setId} className="flex items-center gap-3 px-4 py-2.5 border-t border-surface-border/60">
               <span className="text-sm text-tx-secondary min-w-0 flex-1 truncate flex items-center gap-1.5">
                 {sg.isPR && <Award className="w-3.5 h-3.5 text-warning-400 flex-shrink-0" />}
-                <span className="truncate"><span className="font-semibold text-tx-primary">{sg.exName}</span> · Set {sg.setNumber}</span>
+                <span className="truncate"><span className="font-semibold text-tx-primary">{sg.exName}</span> · {t('Set {n}', { n: sg.setNumber })}</span>
               </span>
               <span className="text-sm tabular-nums whitespace-nowrap flex-shrink-0">
                 <span className="text-tx-muted line-through">{sg.oldLabel}</span>
@@ -225,7 +233,7 @@ export default function ProgramDetail() {
                 <button
                   onClick={() => resolveSuggestions([sg.setId], [])}
                   disabled={resolving}
-                  aria-label={`Accept ${sg.exName} set ${sg.setNumber}`}
+                  aria-label={t('Accept {name} set {n}', { name: sg.exName, n: sg.setNumber })}
                   className="w-7 h-7 rounded-lg bg-success-500/15 text-success-400 hover:bg-success-500/25 disabled:opacity-50 flex items-center justify-center transition-colors"
                 >
                   <Check className="w-4 h-4" strokeWidth={3} />
@@ -233,7 +241,7 @@ export default function ProgramDetail() {
                 <button
                   onClick={() => resolveSuggestions([], [sg.setId])}
                   disabled={resolving}
-                  aria-label={`Dismiss ${sg.exName} set ${sg.setNumber}`}
+                  aria-label={t('Dismiss {name} set {n}', { name: sg.exName, n: sg.setNumber })}
                   className="w-7 h-7 rounded-lg bg-surface-muted text-tx-muted hover:text-tx-primary disabled:opacity-50 flex items-center justify-center transition-colors"
                 >
                   <X className="w-4 h-4" strokeWidth={3} />
@@ -247,14 +255,14 @@ export default function ProgramDetail() {
               className="w-full flex items-center justify-center gap-1.5 py-2 border-t border-surface-border/60 text-warning-400 hover:text-warning-300 text-xs font-semibold transition-colors"
             >
               {showAllSuggestions
-                ? <>Show less <ChevronUp className="w-3.5 h-3.5" /></>
-                : <>Show all {suggestions.length} <ChevronDown className="w-3.5 h-3.5" /></>}
+                ? <>{t('Show less')} <ChevronUp className="w-3.5 h-3.5" /></>
+                : <>{t('Show all {n}', { n: suggestions.length })} <ChevronDown className="w-3.5 h-3.5" /></>}
             </button>
           )}
           {resolveError && (
             <div className="flex items-start gap-2 px-4 py-2.5 border-t border-surface-border/60 text-sm text-error-400">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span className="flex-1">{resolveError}</span>
+              <span className="flex-1">{t(resolveError)}</span>
             </div>
           )}
           <div className="flex gap-2 px-4 py-3 border-t border-surface-border/60">
@@ -263,14 +271,14 @@ export default function ProgramDetail() {
               disabled={resolving}
               className="flex-1 py-2 rounded-lg bg-surface-muted border border-surface-border text-tx-secondary hover:text-tx-primary disabled:opacity-50 text-sm font-medium transition-colors"
             >
-              Dismiss all
+              {t('Dismiss all')}
             </button>
             <button
               onClick={() => resolveSuggestions(suggestedSetIds, [])}
               disabled={resolving}
               className="flex-1 py-2 rounded-lg bg-warning-500 hover:bg-warning-400 disabled:opacity-50 text-[#1a1400] text-sm font-semibold transition-colors"
             >
-              Apply all ({suggestions.length})
+              {t('Apply all ({n})', { n: suggestions.length })}
             </button>
           </div>
         </div>
@@ -294,7 +302,7 @@ export default function ProgramDetail() {
           <div className="min-w-0 flex-1">
             <h1 className="font-display font-bold text-xl text-tx-primary leading-tight">{program.name}</h1>
             <p className="text-sm text-tx-muted mt-0.5">
-              Created {format(new Date(program.created_at), 'MMM d, yyyy')}
+              {t('Created {date}', { date: format(new Date(program.created_at), 'MMM d, yyyy', { locale: dfLocale }) })}
             </p>
           </div>
         </div>
@@ -303,21 +311,21 @@ export default function ProgramDetail() {
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <CalendarDays className="w-3.5 h-3.5 text-tx-muted" />
-              <p className="text-xs text-tx-muted">Cycle</p>
+              <p className="text-xs text-tx-muted">{t('Cycle')}</p>
             </div>
             <p className="text-lg font-bold text-tx-primary tabular-nums">{days.length || '—'}</p>
           </div>
-          <div className="text-center border-l border-surface-border">
+          <div className="text-center border-s border-surface-border">
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Dumbbell className="w-3.5 h-3.5 text-tx-muted" />
-              <p className="text-xs text-tx-muted">Exercises</p>
+              <p className="text-xs text-tx-muted">{t('Exercises')}</p>
             </div>
             <p className="text-lg font-bold text-tx-primary tabular-nums">{allExs.length}</p>
           </div>
-          <div className="text-center border-l border-surface-border">
+          <div className="text-center border-s border-surface-border">
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <BookOpen className="w-3.5 h-3.5 text-tx-muted" />
-              <p className="text-xs text-tx-muted">Total Sets</p>
+              <p className="text-xs text-tx-muted">{t('Total Sets')}</p>
             </div>
             <p className="text-lg font-bold text-tx-primary tabular-nums">{totalSets}</p>
           </div>
@@ -334,12 +342,12 @@ export default function ProgramDetail() {
       {days.length === 0 ? (
         <div className="card p-6 text-center">
           <CalendarDays className="w-8 h-8 text-tx-muted mx-auto mb-2 opacity-50" />
-          <p className="text-sm text-tx-muted">No days yet</p>
+          <p className="text-sm text-tx-muted">{t('No days yet')}</p>
           <button
             onClick={() => navigate(`/programs/${program.id}/edit`)}
             className="mt-2 text-xs text-brand-400 hover:text-brand-300 font-medium transition-colors"
           >
-            Add a day →
+            {t('Add a day →')}
           </button>
         </div>
       ) : (
@@ -360,11 +368,11 @@ export default function ProgramDetail() {
                 }`}
               >
                 {day.is_rest_day ? <Moon className="w-3.5 h-3.5" /> : <Dumbbell className="w-3.5 h-3.5" />}
-                {dayLabel(day, day.order_index)}
+                {dayName(day)}
                 {/* Textual chip, not a bare dot — a color-only marker isn't
                     distinguishable by shape/text (a11y) and reads as decoration. */}
                 {isToday && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-brand-500/15 text-brand-400'}`}>TODAY</span>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-brand-500/15 text-brand-400'}`}>{t('TODAY')}</span>
                 )}
               </button>
             )
@@ -376,21 +384,21 @@ export default function ProgramDetail() {
       {selectedDay?.is_rest_day ? (
         <div className="card p-8 text-center">
           <Moon className="w-8 h-8 text-tx-muted mx-auto mb-2 opacity-60" />
-          <p className="text-sm font-medium text-tx-primary">Rest Day</p>
-          <p className="text-xs text-tx-muted mt-1">No exercises scheduled — recover and come back stronger.</p>
+          <p className="text-sm font-medium text-tx-primary">{t('Rest Day')}</p>
+          <p className="text-xs text-tx-muted mt-1">{t('No exercises scheduled — recover and come back stronger.')}</p>
         </div>
       ) : selectedDay ? (
         <>
           {!restOn && (
             <div className="flex items-center gap-1.5 text-[11px] text-tx-muted px-1">
-              <TimerOff className="w-3.5 h-3.5" /> Rest timer is off — turn it on in Settings
+              <TimerOff className="w-3.5 h-3.5" /> {t('Rest timer is off — turn it on in Settings')}
             </div>
           )}
           <div className="space-y-2">
             {(selectedDay.exercises ?? []).length === 0 ? (
               <div className="card p-6 text-center">
                 <Dumbbell className="w-8 h-8 text-tx-muted mx-auto mb-2 opacity-50" />
-                <p className="text-sm text-tx-muted">No exercises on this day yet</p>
+                <p className="text-sm text-tx-muted">{t('No exercises on this day yet')}</p>
               </div>
             ) : (selectedDay.exercises ?? []).map((ex) => {
               const sets = ex.sets ?? []
@@ -401,7 +409,7 @@ export default function ProgramDetail() {
                 <button
                   key={ex.id}
                   onClick={() => navigate(`/exercises/${ex.exercise_id}`)}
-                  className="card w-full overflow-hidden text-left active:scale-[0.99] transition-transform"
+                  className="card w-full overflow-hidden text-start active:scale-[0.99] transition-transform"
                 >
                   <div className="flex items-center gap-3 p-4">
                     {ex.exercise?.image_url ? (
@@ -421,10 +429,10 @@ export default function ProgramDetail() {
                       <div className="flex items-center gap-2 mt-0.5">
                         {ex.exercise?.muscle_group && (
                           <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium flex-shrink-0 ${muscleColor(ex.exercise.muscle_group)}`}>
-                            {ex.exercise.muscle_group}
+                            {t(ex.exercise.muscle_group)}
                           </span>
                         )}
-                        <span className="text-xs text-tx-muted truncate">{sets.length} set{sets.length === 1 ? '' : 's'}{maxTarget > 0 ? ` · target ${maxTarget} ${wUnit}` : ''}</span>
+                        <span className="text-xs text-tx-muted truncate">{t(sets.length === 1 ? '{n} set' : '{n} sets', { n: sets.length })}{maxTarget > 0 ? ` · ${t('target {w} {unit}', { w: maxTarget, unit: wUnit })}` : ''}</span>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-tx-muted flex-shrink-0" />
@@ -441,14 +449,14 @@ export default function ProgramDetail() {
                               hasSuggestion ? 'bg-warning-500/10 text-tx-secondary ring-1 ring-warning-500/40'
                                 : isBest ? 'bg-brand-500/15 text-brand-300 ring-1 ring-brand-500/25' : 'bg-surface-raised text-tx-secondary'
                             }`}>
-                              {set.target_reps > 0 ? set.target_reps : '—'} × {set.target_weight > 0 ? `${displayWeight(set.target_weight, wUnit)} ${wUnit}` : 'BW'}
+                              {set.target_reps > 0 ? set.target_reps : '—'} × {set.target_weight > 0 ? `${displayWeight(set.target_weight, wUnit)} ${wUnit}` : t('BW')}
                             </div>
                           )
                         })}
                       </div>
                       {restOn && (ex.rest_seconds === 0
-                        ? <span className="text-xs text-tx-muted flex-shrink-0">No rest</span>
-                        : <span className="flex items-center gap-1 text-xs text-tx-muted flex-shrink-0"><Pause className="w-3.5 h-3.5" />{restLabel(ex.rest_seconds ?? 90)}</span>
+                        ? <span className="text-xs text-tx-muted flex-shrink-0">{t('No rest')}</span>
+                        : <span className="flex items-center gap-1 text-xs text-tx-muted flex-shrink-0"><Pause className="w-3.5 h-3.5" />{restText(ex.rest_seconds ?? 90)}</span>
                       )}
                     </div>
                   )}

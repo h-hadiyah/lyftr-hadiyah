@@ -8,6 +8,7 @@ import { formatVersion, registrationOpen, lengthRuleLabel, matchRuleLabel, newPa
 import Logo from '../components/Logo'
 import ServerSettings from '../components/ServerSettings'
 import PasswordField, { Rule } from '../components/ui/PasswordField'
+import { t } from '../i18n'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -64,15 +65,15 @@ export default function Register() {
         {/* Headline and features */}
         <div className="relative space-y-8">
           <h1 className="font-display font-bold text-5xl leading-tight tracking-tight">
-            Log. Lift.
+            {t('Log. Lift.')}
             <br />
             <span className="bg-gradient-to-r from-brand-500 to-violet-500 bg-clip-text text-transparent">
-              Progress.
+              {t('Progress.')}
             </span>
           </h1>
 
           <p className="text-tx-secondary text-base leading-relaxed max-w-sm">
-            Your self-hosted fitness tracker. Track workouts, log food, monitor weight — all under your control, running on your own server.
+            {t('Your self-hosted fitness tracker. Track workouts, log food, monitor weight — all under your control, running on your own server.')}
           </p>
 
           {/* Features */}
@@ -84,7 +85,7 @@ export default function Register() {
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-3 text-tx-muted text-sm">
                 <Icon className="w-4 h-4 text-brand-500" strokeWidth={2} />
-                {label}
+                {t(label)}
               </div>
             ))}
           </div>
@@ -92,7 +93,7 @@ export default function Register() {
 
         {/* Footer */}
         <div className="relative text-tx-muted text-xs">
-          © lyftr{serverInfo?.version ? ` · ${formatVersion(serverInfo.version)}` : ''}
+          © {t('Hadiyah Fit')}{serverInfo?.version ? ` · ${formatVersion(serverInfo.version)}` : ''}
         </div>
       </div>
 
@@ -107,12 +108,12 @@ export default function Register() {
           {/* Heading */}
           <div className="mb-8">
             <h2 className="font-display font-bold text-3xl text-tx-primary tracking-tight">
-              {isOpen ? 'Create account' : 'Registration closed'}
+              {isOpen ? t('Create account') : t('Registration closed')}
             </h2>
             <p className="text-tx-muted text-sm mt-2">
               {isOpen
-                ? 'Start tracking your fitness today.'
-                : 'This server is not accepting new accounts.'}
+                ? t('Start tracking your fitness today.')
+                : t('This server is not accepting new accounts.')}
             </p>
           </div>
 
@@ -127,12 +128,11 @@ export default function Register() {
               <div className="flex gap-3 rounded-xl border border-surface-border bg-surface-raised p-4">
                 <Lock className="w-4 h-4 mt-0.5 flex-shrink-0 text-tx-muted" />
                 <p className="text-sm text-tx-secondary leading-relaxed">
-                  The owner of this Lyftr instance has turned off new signups. If you should
-                  have an account here, ask them to create one for you.
+                  {t('The owner of this Lyftr instance has turned off new signups. If you should have an account here, ask them to create one for you.')}
                 </p>
               </div>
               <Link to="/login" className="btn-primary btn-lg w-full flex items-center justify-center gap-2">
-                Back to sign in
+                {t('Back to sign in')}
               </Link>
             </div>
           ) : (
@@ -141,7 +141,7 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="label">Email</label>
+              <label htmlFor="email" className="label">{t('Email')}</label>
               <input
                 id="email"
                 type="email"
@@ -157,32 +157,32 @@ export default function Register() {
             {/* Password */}
             <PasswordField
               id="password"
-              label="Password"
+              label={t('Password')}
               value={password}
               onChange={setPassword}
               autoComplete="new-password"
               placeholder="••••••••"
             >
-              <Rule state={rules.length}>{lengthRuleLabel(password)}</Rule>
+              <Rule state={rules.length}>{t(lengthRuleLabel(password))}</Rule>
             </PasswordField>
 
             {/* Confirm password */}
             <PasswordField
               id="password-confirm"
-              label="Confirm password"
+              label={t('Confirm password')}
               value={passwordConfirm}
               onChange={setPasswordConfirm}
               autoComplete="new-password"
               placeholder="••••••••"
             >
-              <Rule state={rules.match}>{matchRuleLabel(rules.match)}</Rule>
+              <Rule state={rules.match}>{t(matchRuleLabel(rules.match))}</Rule>
             </PasswordField>
 
             {/* Error */}
             {error && (
               <div className="alert-error">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>{error}</span>
+                <span>{t(error)}</span>
               </div>
             )}
 
@@ -193,18 +193,18 @@ export default function Register() {
               className="btn-primary btn-lg w-full mt-6 flex items-center justify-center gap-2"
             >
               <UserPlus className="w-4 h-4" />
-              {isLoading ? 'Creating account…' : 'Create account'}
+              {isLoading ? t('Creating account…') : t('Create account')}
             </button>
           </form>
 
           {/* Sign in link */}
           <p className="mt-8 text-center text-sm text-tx-muted">
-            Already have an account?{' '}
+            {t('Already have an account?')}{' '}
             <Link
               to="/login"
               className="text-brand-400 font-medium hover:text-brand-300 transition-colors"
             >
-              Sign in
+              {t('Sign in')}
             </Link>
           </p>
           </>

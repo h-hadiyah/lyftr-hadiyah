@@ -5,16 +5,22 @@ import { ArrowLeft, Scale, Trash2, Edit2, Save, X, AlertCircle, Loader } from 'l
 import { weightAPI } from '../services/api'
 import { useSettingsStore, weightShort, displayWeight, weightError, maxWeight, resolveWeightLbs } from '../stores/settings'
 import { useEscapeKey } from '../hooks/useEscapeKey'
-import { useAsyncAction, apiErrorMessage, isNotFound, todayStr, dayToInstant, entryDay, BODYWEIGHT_STEP, clampStep, types, formatDay } from '@lyftr/shared'
+import { useAsyncAction, apiErrorMessage, isNotFound, todayStr, dayToInstant, entryDay, BODYWEIGHT_STEP, clampStep, types, formatDay, UNKNOWN_DAY, dayToLocalDate } from '@lyftr/shared'
 import { ErrorState } from '../components/ui'
+import { format } from 'date-fns'
+import { t, dfLocale } from '../i18n'
 import StepperTile from '../components/ui/StepperTile'
 import NumberField from '../components/ui/NumberField'
+
+// formatDay validates the day but has no locale; format a valid one in the UI language.
+const fmtDay = (day: string, p: string) =>
+  formatDay(day, p) === UNKNOWN_DAY ? UNKNOWN_DAY : format(dayToLocalDate(day), p, { locale: dfLocale })
 
 export default function WeightDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { settings } = useSettingsStore()
-  const wUnit = weightShort(settings.weight_unit)
+  const wUnit = t(weightShort(settings.weight_unit))
 
   const [log, setLog] = useState<types.WeightLog | null>(null)
   const [loading, setLoading] = useState(true)
@@ -72,7 +78,7 @@ export default function WeightDetail() {
     const w = parseFloat(editWeight)
     const wErr = weightError(w, settings.weight_unit)
     if (wErr) {
-      setEditError(wErr)
+      setEditError(wErr === 'Enter a valid weight' ? t(wErr) : t('Weight must be under {max} {unit}', { max: Math.round(maxWeight(settings.weight_unit)), unit: wUnit }))
       return
     }
     setEditError('')
@@ -98,10 +104,10 @@ export default function WeightDetail() {
     return (
       <ErrorState
         size="page"
-        title="Couldn't load this entry"
-        message={error ?? 'That entry no longer exists.'}
+        title={t("Couldn't load this entry")}
+        message={t(error ?? 'That entry no longer exists.')}
         onRetry={error && !gone ? () => { setError(null); setRetryKey(k => k + 1) } : undefined}
-        secondary={<Link to="/weight" className="btn-secondary btn-sm">Back to weight</Link>}
+        secondary={<Link to="/weight" className="btn-secondary btn-sm">{t('Back to weight')}</Link>}
       />
     )
   }
@@ -111,21 +117,21 @@ export default function WeightDetail() {
       {/* Back nav + actions */}
       <div className="flex items-center justify-between">
         <Link to="/weight" className="flex items-center gap-1.5 text-sm text-tx-muted hover:text-tx-primary transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Weight
+          <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t('Weight')}
         </Link>
         {!editing && (
           <div className="flex items-center gap-1">
             <button
               onClick={startEdit}
               className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
-              aria-label="Edit entry"
+              aria-label={t('Edit entry')}
             >
               <Edit2 className="w-4 h-4 text-brand-500" />
             </button>
             <button
               onClick={() => setConfirming(true)}
               className="p-2 hover:bg-error-500/10 rounded-lg transition-colors"
-              aria-label="Delete entry"
+              aria-label={t('Delete entry')}
             >
               <Trash2 className="w-4 h-4 text-error-400" />
             </button>
@@ -140,9 +146,9 @@ export default function WeightDetail() {
             <Scale className="w-7 h-7 text-brand-500" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="stat-label mb-1">Weight Entry</p>
+            <p className="stat-label mb-1">{t('Weight Entry')}</p>
             {editing ? (
-              <p className="text-sm text-brand-400 font-medium">Editing…</p>
+              <p className="text-sm text-brand-400 font-medium">{t('Editing…')}</p>
             ) : (
               <>
                 <div className="flex items-end gap-2">
@@ -150,7 +156,7 @@ export default function WeightDetail() {
                   <span className="text-tx-muted text-lg mb-1">{wUnit}</span>
                 </div>
                 <p className="text-sm text-tx-muted mt-1">
-                  {formatDay(entryDay(log), 'EEEE, MMMM d, yyyy')}
+                  {fmtDay(entryDay(log), 'EEEE, MMMM d, yyyy')}
                 </p>
                 {log.notes && (
                   <p className="text-sm text-tx-secondary mt-2 italic">"{log.notes}"</p>
@@ -164,27 +170,27 @@ export default function WeightDetail() {
       {/* Edit form */}
       {editing && (
         <div className="card p-5">
-          <h2 className="section-title mb-4">Edit Entry</h2>
+          <h2 className="section-title mb-4">{t('Edit Entry')}</h2>
           <form onSubmit={handleSave} className="space-y-4">
             {(editError || saveEdit.error) && (
               <div className="alert-error" role="alert">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{editError || saveEdit.error}</span>
+                <span>{t(editError || saveEdit.error || '')}</span>
               </div>
             )}
 
             <StepperTile
               icon={Scale}
-              label={`Weight (${wUnit})`}
+              label={t('Weight ({unit})', { unit: wUnit })}
               name="weight"
               step={BODYWEIGHT_STEP}
               onStep={d => setEditWeight(String(clampStep(parseFloat(editWeight) || 0, d, { max: maxWeight(settings.weight_unit) })))}
             >
-              <NumberField value={editWeight} onChange={setEditWeight} aria-label="Weight" />
+              <NumberField value={editWeight} onChange={setEditWeight} aria-label={t('Weight')} />
             </StepperTile>
 
             <div>
-              <label className="label">Date</label>
+              <label className="label">{t('Date')}</label>
               <input
                 type="date"
                 value={editDate}
@@ -195,12 +201,12 @@ export default function WeightDetail() {
             </div>
 
             <div>
-              <label className="label">Notes <span className="text-tx-muted font-normal">(optional)</span></label>
+              <label className="label">{t('Notes')} <span className="text-tx-muted font-normal">{t('(optional)')}</span></label>
               <input
                 type="text"
                 value={editNotes}
                 onChange={e => setEditNotes(e.target.value)}
-                placeholder="e.g., morning, post-workout"
+                placeholder={t('e.g., morning, post-workout')}
                 maxLength={200}
                 className="input mt-1"
               />
@@ -212,7 +218,7 @@ export default function WeightDetail() {
                 onClick={() => { setEditing(false); setEditError('') }}
                 className="flex-1 py-2.5 bg-surface-muted hover:bg-surface-muted/80 text-tx-secondary rounded-xl transition-colors font-medium text-sm flex items-center justify-center gap-1.5"
               >
-                <X className="w-4 h-4" /> Cancel
+                <X className="w-4 h-4" /> {t('Cancel')}
               </button>
               <button
                 type="submit"
@@ -220,7 +226,7 @@ export default function WeightDetail() {
                 className="flex-1 btn-primary py-2.5 rounded-xl flex items-center justify-center gap-1.5"
               >
                 <Save className="w-4 h-4" />
-                {saveEdit.busy ? 'Saving…' : 'Save'}
+                {saveEdit.busy ? t('Saving…') : t('Save')}
               </button>
             </div>
           </form>
@@ -232,12 +238,12 @@ export default function WeightDetail() {
         open={confirming}
         icon={Trash2}
         destructive
-        title="Delete Entry?"
-        message={`${formatDay(entryDay(log), 'MMMM d, yyyy')} · ${displayWeight(log.weight, settings.weight_unit)} ${wUnit} will be permanently deleted.`}
-        confirmLabel="Delete"
-        busyLabel="Deleting…"
+        title={t('Delete Entry?')}
+        message={t('{date} · {w} {unit} will be permanently deleted.', { date: fmtDay(entryDay(log), 'MMMM d, yyyy'), w: displayWeight(log.weight, settings.weight_unit), unit: wUnit })}
+        confirmLabel={t('Delete')}
+        busyLabel={t('Deleting…')}
         busy={remove.busy}
-        error={remove.error}
+        error={remove.error ? t(remove.error) : remove.error}
         onConfirm={() => { if (!remove.busy) void remove.run(log) }}
         onCancel={() => { setConfirming(false); remove.reset() }}
       />

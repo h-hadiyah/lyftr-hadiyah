@@ -35,8 +35,8 @@ const detectTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone ||
 
 export const useSettingsStore = createSettingsStore(client, storage, detectTimezone)
 export const useWorkoutSession = createWorkoutSession(storage)
-// Dark-first on web (mobile is light-first, per product).
-export const useThemeStore = createThemeStore(storage, 'dark')
+// Light-first: the Hadiyah identity is drawn on light surfaces.
+export const useThemeStore = createThemeStore(storage, 'light')
 
 // Replaces the theme-color tag rather than editing it. Browsers diff this value to decide
 // whether to repaint their chrome, and setAttribute('content', …) on the existing element

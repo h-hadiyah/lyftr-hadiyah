@@ -18,7 +18,7 @@ const MUSCLE_COLORS: Record<string, string> = {
   calves:     'bg-lime-500/20 text-lime-400 border-lime-500/30',
   abdominals: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
   core:       'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  forearms:   'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+  forearms:   'bg-teal-500/20 text-teal-400 border-teal-500/30',
   traps:      'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
   lats:       'bg-sky-500/20 text-sky-400 border-sky-500/30',
 }

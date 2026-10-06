@@ -1,5 +1,6 @@
 import { Minus, Plus } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { t } from '../../i18n'
 
 interface Props {
   icon: LucideIcon
@@ -27,10 +28,10 @@ export default function StepperTile({ icon: Icon, label, name, step, onStep, dis
         {children}
       </div>
       <div className="flex border-t border-surface-border divide-x divide-surface-border">
-        <button type="button" aria-label={`Decrease ${name}`} disabled={disabled} onClick={() => onStep(-step)} className={btn}>
+        <button type="button" aria-label={t('Decrease {name}', { name })} disabled={disabled} onClick={() => onStep(-step)} className={btn}>
           <Minus className="w-5 h-5" />
         </button>
-        <button type="button" aria-label={`Increase ${name}`} disabled={disabled} onClick={() => onStep(step)} className={btn}>
+        <button type="button" aria-label={t('Increase {name}', { name })} disabled={disabled} onClick={() => onStep(step)} className={btn}>
           <Plus className="w-5 h-5" />
         </button>
       </div>

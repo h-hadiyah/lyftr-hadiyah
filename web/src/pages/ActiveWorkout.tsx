@@ -11,6 +11,7 @@ import { workoutAPI } from '../services/api'
 import { muscleColor } from '../utils/exerciseUtils'
 import { formatElapsed, useAsyncAction, useElapsedSeconds } from '@lyftr/shared'
 import { ConfirmSheet } from '../components/ui'
+import { t } from '../i18n'
 
 function ExerciseNotes({ exIdx, notes, onSave }: { exIdx: number; notes: string; onSave: (i: number, v: string) => void }) {
   const [editing, setEditing] = useState(false)
@@ -28,7 +29,7 @@ function ExerciseNotes({ exIdx, notes, onSave }: { exIdx: number; notes: string;
           onChange={e => setVal(e.target.value)}
           onBlur={commit}
           onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setVal(notes); setEditing(false) } }}
-          placeholder="Add a note…"
+          placeholder={t('Add a note…')}
           className="input text-sm w-full"
         />
       </div>
@@ -41,7 +42,7 @@ function ExerciseNotes({ exIdx, notes, onSave }: { exIdx: number; notes: string;
         onClick={() => { setVal(notes); setEditing(true) }}
         className="text-xs text-tx-muted hover:text-tx-secondary transition-colors"
       >
-        {notes ? <span className="italic">{notes}</span> : <span className="opacity-50">+ Add note</span>}
+        {notes ? <span className="italic">{notes}</span> : <span className="opacity-50">{t('+ Add note')}</span>}
       </button>
     </div>
   )
@@ -74,7 +75,7 @@ export default function ActiveWorkout() {
     cancelSession()
     // Surface the routine auto-progression as a toast on the workouts list (#40).
     navigate('/workouts', saved?.progression ? { state: { progression: saved.progression } } : undefined)
-  }, 'Failed to save workout')
+  }, t('Failed to save workout'))
 
   // Workout elapsed timer
   if (!session) {
@@ -83,9 +84,9 @@ export default function ActiveWorkout() {
         <div className="w-12 h-12 rounded-xl bg-surface-muted border border-surface-border flex items-center justify-center mb-4">
           <Dumbbell className="w-6 h-6 text-tx-muted" />
         </div>
-        <p className="text-sm font-medium text-tx-primary mb-1">No active workout</p>
-        <p className="text-xs text-tx-muted mb-4">Start one from the home page</p>
-        <button onClick={() => navigate('/')} className="btn-primary btn-sm">Go Home</button>
+        <p className="text-sm font-medium text-tx-primary mb-1">{t('No active workout')}</p>
+        <p className="text-xs text-tx-muted mb-4">{t('Start one from the home page')}</p>
+        <button onClick={() => navigate('/')} className="btn-primary btn-sm">{t('Go Home')}</button>
       </div>
     )
   }
@@ -129,7 +130,7 @@ export default function ActiveWorkout() {
                 <Timer className="w-3.5 h-3.5" />
                 {formatElapsed(elapsed)}
               </span>
-              <span className="text-xs text-tx-muted">{completedSets}/{totalSets} sets done</span>
+              <span className="text-xs text-tx-muted">{t('{done}/{total} sets done', { done: completedSets, total: totalSets })}</span>
             </div>
           </div>
           <button
@@ -141,7 +142,7 @@ export default function ActiveWorkout() {
             }`}
           >
             <Flag className="w-4 h-4" />
-            Finish
+            {t('Finish')}
           </button>
         </div>
 
@@ -196,8 +197,8 @@ export default function ActiveWorkout() {
             <div className="w-12 h-12 rounded-xl bg-surface-muted border border-surface-border flex items-center justify-center mb-4">
               <Dumbbell className="w-6 h-6 text-tx-muted" />
             </div>
-            <p className="text-sm font-medium text-tx-primary mb-1">No exercises yet</p>
-            <p className="text-xs text-tx-muted">Add exercises below</p>
+            <p className="text-sm font-medium text-tx-primary mb-1">{t('No exercises yet')}</p>
+            <p className="text-xs text-tx-muted">{t('Add exercises below')}</p>
           </div>
         ) : (
           session.exercises.map((ex, exIdx) => {
@@ -240,7 +241,7 @@ export default function ActiveWorkout() {
                   {/* Name + muscle + progress — taps to info page */}
                   <button
                     onClick={() => navigate(`/workout/active/exercise/${ex.exercise_id}`)}
-                    className="flex-1 min-w-0 text-left group"
+                    className="flex-1 min-w-0 text-start group"
                   >
                     <div className="flex items-center gap-1.5">
                       <span className="text-base font-semibold text-tx-primary truncate leading-tight group-hover:text-brand-400 transition-colors">
@@ -250,9 +251,9 @@ export default function ActiveWorkout() {
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${muscleColor(ex.exercise.muscle_group)}`}>
-                        {ex.exercise.muscle_group}
+                        {t(ex.exercise.muscle_group)}
                       </span>
-                      <span className="text-xs text-tx-muted tabular-nums">{completedHere}/{ex.sets.length} sets</span>
+                      <span className="text-xs text-tx-muted tabular-nums">{t('{done}/{total} sets', { done: completedHere, total: ex.sets.length })}</span>
                     </div>
                   </button>
 
@@ -265,7 +266,7 @@ export default function ActiveWorkout() {
                     <button
                       onClick={() => removeExercise(exIdx)}
                       className="w-9 h-9 flex items-center justify-center hover:bg-error-500/10 rounded-xl transition-colors flex-shrink-0 group/rm"
-                      aria-label="Remove exercise"
+                      aria-label={t('Remove exercise')}
                     >
                       <X className="w-4 h-4 text-tx-muted group-hover/rm:text-error-400 transition-colors" />
                     </button>
@@ -279,10 +280,10 @@ export default function ActiveWorkout() {
                 <div className="px-3 pb-3 space-y-2">
                   {/* Column labels */}
                   <div className="grid grid-cols-[2rem_1fr_1fr_3.5rem_2rem] gap-2 px-1">
-                    <span className="text-xs text-tx-muted font-medium text-center">Set</span>
-                    <span className="text-xs text-tx-muted font-medium text-center">Reps</span>
-                    <span className="text-xs text-tx-muted font-medium text-center">Weight</span>
-                    <span className="text-xs text-tx-muted font-medium text-center">Done</span>
+                    <span className="text-xs text-tx-muted font-medium text-center">{t('Set')}</span>
+                    <span className="text-xs text-tx-muted font-medium text-center">{t('Reps')}</span>
+                    <span className="text-xs text-tx-muted font-medium text-center">{t('Weight')}</span>
+                    <span className="text-xs text-tx-muted font-medium text-center">{t('Done')}</span>
                     <span />
                   </div>
 
@@ -300,7 +301,7 @@ export default function ActiveWorkout() {
                         }`}
                       >
                         {/* Set number */}
-                        <div className="flex items-center justify-center py-3 rounded-l-xl">
+                        <div className="flex items-center justify-center py-3 rounded-s-xl">
                           <span className={`text-sm font-bold tabular-nums ${
                             set.completed ? 'text-brand-400' : isNextSet ? 'text-brand-300' : 'text-tx-muted'
                           }`}>{set.set_number}</span>
@@ -332,7 +333,7 @@ export default function ActiveWorkout() {
                             "button" with no way to tell a done set from a pending one.
                             aria-pressed carries what the fill colour conveys visually. */}
                         <button
-                          aria-label={`Set ${set.set_number}, mark done`}
+                          aria-label={t('Set {n}, mark done', { n: set.set_number })}
                           aria-pressed={!!set.completed}
                           onClick={() => handleCompleteSet(exIdx, setIdx)}
                           className={`flex items-center justify-center transition-colors min-h-[3rem] ${
@@ -351,8 +352,8 @@ export default function ActiveWorkout() {
                         {/* Remove set */}
                         <button
                           onClick={() => removeSet(exIdx, setIdx)}
-                          className="flex items-center justify-center rounded-r-xl hover:bg-error-500/10 transition-colors group/del"
-                          aria-label="Remove set"
+                          className="flex items-center justify-center rounded-e-xl hover:bg-error-500/10 transition-colors group/del"
+                          aria-label={t('Remove set')}
                         >
                           <X className="w-3.5 h-3.5 text-tx-muted/40 group-hover/del:text-error-400 transition-colors" />
                         </button>
@@ -366,7 +367,7 @@ export default function ActiveWorkout() {
                       <button
                         onClick={() => jumpToExercise(exIdx - 1)}
                         className="py-2.5 px-3 flex items-center justify-center rounded-xl bg-surface-muted hover:bg-surface-muted/80 text-tx-secondary border border-surface-border transition-colors"
-                        aria-label="Previous exercise"
+                        aria-label={t('Previous exercise')}
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
                       </button>
@@ -377,7 +378,7 @@ export default function ActiveWorkout() {
                       className="flex-1 py-2.5 flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-surface-border hover:border-brand-500/40 hover:bg-brand-500/5 text-xs font-medium text-tx-muted hover:text-brand-400 transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Add Set
+                      {t('Add Set')}
                     </button>
 
                     {isActive && exIdx < session.exercises.length - 1 && (
@@ -389,7 +390,7 @@ export default function ActiveWorkout() {
                             : 'bg-surface-muted hover:bg-surface-muted/80 text-tx-secondary border border-surface-border'
                         }`}
                       >
-                        Next
+                        {t('Next')}
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     )}
@@ -403,7 +404,7 @@ export default function ActiveWorkout() {
                         }`}
                       >
                         <Flag className="w-3.5 h-3.5" />
-                        Finish
+                        {t('Finish')}
                       </button>
                     )}
                   </div>
@@ -421,14 +422,14 @@ export default function ActiveWorkout() {
           className="w-full py-3.5 bg-surface-muted/60 hover:bg-surface-muted border border-surface-border hover:border-brand-500/40 rounded-2xl text-sm font-medium text-tx-secondary hover:text-brand-400 transition-colors flex items-center justify-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          Add Exercise
+          {t('Add Exercise')}
         </button>
 
         <button
           onClick={() => setConfirmCancel(true)}
           className="w-full py-2.5 text-xs text-tx-muted hover:text-error-400 transition-colors"
         >
-          Cancel Workout
+          {t('Cancel Workout')}
         </button>
       </div>
       </>
@@ -437,13 +438,13 @@ export default function ActiveWorkout() {
       <ConfirmSheet
         open={confirmFinish}
         icon={Flag}
-        title="Finish Workout?"
-        message={`${completedSets} of ${totalSets} sets completed. Workout will be saved.`}
-        confirmLabel="Finish"
-        busyLabel="Saving…"
-        cancelLabel="Keep Going"
+        title={t('Finish Workout?')}
+        message={t('{done} of {total} sets completed. Workout will be saved.', { done: completedSets, total: totalSets })}
+        confirmLabel={t('Finish')}
+        busyLabel={t('Saving…')}
+        cancelLabel={t('Keep Going')}
         busy={finish.busy}
-        error={finish.error}
+        error={finish.error && t(finish.error)}
         onConfirm={() => { void finish.run() }}
         onCancel={() => { setConfirmFinish(false); finish.reset() }}
       />
@@ -453,10 +454,10 @@ export default function ActiveWorkout() {
         open={confirmCancel}
         icon={Trash2}
         destructive
-        title="Cancel Workout?"
-        message="All progress will be lost."
-        confirmLabel="Cancel"
-        cancelLabel="Keep Going"
+        title={t('Cancel Workout?')}
+        message={t('All progress will be lost.')}
+        confirmLabel={t('Cancel')}
+        cancelLabel={t('Keep Going')}
         onConfirm={() => { cancelSession(); navigate('/') }}
         onCancel={() => setConfirmCancel(false)}
       />

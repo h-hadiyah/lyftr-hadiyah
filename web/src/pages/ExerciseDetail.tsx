@@ -12,6 +12,7 @@ import PeriodSelector from '../components/PeriodSelector'
 import { apiErrorMessage, isNotFound, types } from '@lyftr/shared'
 import { ErrorState } from '../components/ui'
 import { muscleColor, muscleColorBordered, EQUIPMENT_LABEL, muscleToBodySlugs } from '../utils/exerciseUtils'
+import { t, dfLocale } from '../i18n'
 
 const HISTORY_PERIODS = ['1m', '3m', '6m', 'All'] as const
 type HistoryPeriod = typeof HISTORY_PERIODS[number]
@@ -78,7 +79,7 @@ export default function ExerciseDetail() {
       })
       .catch(err => {
         setGone(isNotFound(err))
-        setError(apiErrorMessage(err, "The server didn't say what went wrong."))
+        setError(apiErrorMessage(err, t("The server didn't say what went wrong.")))
       })
       .finally(() => setLoading(false))
   }, [exerciseId, retryKey])
@@ -91,7 +92,7 @@ export default function ExerciseDetail() {
   }, [history, historyPeriod])
 
   const bodyColor = isDark ? '#162240' : '#e2e8f0'
-  const highlightColors = ['#0e7490', '#22d3ee'] // [secondary=cyan-700, primary=cyan-400]
+  const highlightColors = ['#0e7490', '#22d3ee'] // [secondary=teal-700, primary=teal-400]
 
   // A dropped connection used to navigate(-1) — off the screen, no explanation, nothing to
   // retry. Say what happened and leave them where they tapped.
@@ -99,10 +100,10 @@ export default function ExerciseDetail() {
     return (
       <ErrorState
         size="page"
-        title="Couldn't load this exercise"
-        message={error}
+        title={t("Couldn't load this exercise")}
+        message={t(error)}
         onRetry={gone ? undefined : () => { setError(null); setRetryKey(k => k + 1) }}
-        secondary={<button onClick={() => navigate(-1)} className="btn-secondary btn-sm">Go back</button>}
+        secondary={<button onClick={() => navigate(-1)} className="btn-secondary btn-sm">{t('Go back')}</button>}
       />
     )
   }
@@ -116,7 +117,7 @@ export default function ExerciseDetail() {
   }
 
   const bodyData = buildBodyData(exercise)
-  const equipLabel = EQUIPMENT_LABEL[exercise.equipment?.toLowerCase()] || exercise.equipment
+  const equipLabel = t(EQUIPMENT_LABEL[exercise.equipment?.toLowerCase()] || exercise.equipment || '')
   const descLines = exercise.description
     ? exercise.description.split('\n').filter(l => l.trim())
     : []
@@ -126,7 +127,7 @@ export default function ExerciseDetail() {
       {/* Header */}
       <div className="flex items-start gap-3">
         <button
-          aria-label="Go back"
+          aria-label={t('Go back')}
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-surface-muted rounded-lg transition-colors mt-0.5 flex-shrink-0"
         >
@@ -135,14 +136,14 @@ export default function ExerciseDetail() {
         <div className="flex-1 min-w-0">
           <h1 className="font-display font-bold text-2xl text-tx-primary leading-tight">{exercise.name}</h1>
           <span className={`inline-flex items-center mt-1.5 px-2 py-0.5 rounded text-xs font-medium border ${muscleColorBordered(exercise.muscle_group)}`}>
-            {exercise.muscle_group}
+            {t(exercise.muscle_group)}
           </span>
         </div>
       </div>
 
       {/* Muscle diagram */}
       <div className="card p-4">
-        <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-3">Muscles Worked</p>
+        <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-3">{t('Muscles Worked')}</p>
 
         <div className="flex items-start justify-center gap-6">
           <div className="flex flex-col items-center gap-1">
@@ -153,7 +154,7 @@ export default function ExerciseDetail() {
               highlightedColors={highlightColors}
               style={{ width: '140px' }}
             />
-            <span className="text-xs text-tx-muted">Front</span>
+            <span className="text-xs text-tx-muted">{t('Front')}</span>
           </div>
           <div className="flex flex-col items-center gap-1">
             <Model
@@ -163,7 +164,7 @@ export default function ExerciseDetail() {
               highlightedColors={highlightColors}
               style={{ width: '140px' }}
             />
-            <span className="text-xs text-tx-muted">Back</span>
+            <span className="text-xs text-tx-muted">{t('Back')}</span>
           </div>
         </div>
 
@@ -171,11 +172,11 @@ export default function ExerciseDetail() {
         <div className="flex items-center gap-4 mt-3 justify-center">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22d3ee' }} />
-            <span className="text-xs text-tx-muted">Primary</span>
+            <span className="text-xs text-tx-muted">{t('Primary')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#0e7490' }} />
-            <span className="text-xs text-tx-muted">Secondary</span>
+            <span className="text-xs text-tx-muted">{t('Secondary')}</span>
           </div>
         </div>
       </div>
@@ -200,7 +201,7 @@ export default function ExerciseDetail() {
         )}
         {exercise.category && (
           <span className="inline-flex items-center px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-xs font-medium text-brand-400 capitalize">
-            {exercise.category}
+            {t(exercise.category)}
           </span>
         )}
       </div>
@@ -208,11 +209,11 @@ export default function ExerciseDetail() {
       {/* Secondary muscles */}
       {exercise.secondary_muscles?.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-2">Also works</p>
+          <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-2">{t('Also works')}</p>
           <div className="flex flex-wrap gap-1.5">
             {exercise.secondary_muscles.map(m => (
               <span key={m} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${muscleColor(m)}`}>
-                {m}
+                {t(m)}
               </span>
             ))}
           </div>
@@ -224,14 +225,14 @@ export default function ExerciseDetail() {
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-3">
             <Trophy className="w-4 h-4 text-warning-400" />
-            <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider">Your Best</p>
+            <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider">{t('Your Best')}</p>
           </div>
           <div className="flex items-end gap-2">
             <span className="text-2xl font-bold text-tx-primary tabular-nums">{displayWeight(pr.weight, wUnit)}</span>
-            <span className="text-sm text-tx-muted mb-0.5">{wUnit} × {pr.reps} reps</span>
+            <span className="text-sm text-tx-muted mb-0.5">{wUnit} × {t('{n} reps', { n: pr.reps })}</span>
           </div>
           <p className="text-xs text-tx-muted mt-1">
-            Est. 1RM: {displayWeight(pr.estimated_1rm, wUnit)} {wUnit} · {format(new Date(pr.date), 'MMM d, yyyy')}
+            {t('Est. 1RM: {w} {unit} · {date}', { w: displayWeight(pr.estimated_1rm, wUnit), unit: wUnit, date: format(new Date(pr.date), 'MMM d, yyyy', { locale: dfLocale }) })}
           </p>
         </div>
       )}
@@ -239,19 +240,19 @@ export default function ExerciseDetail() {
       {/* History chart */}
       {history.length >= 2 && (() => {
         const chartData = [...filteredHistory].reverse().map(h => ({
-          date: format(new Date(h.date), 'M/d'),
+          date: format(new Date(h.date), 'M/d', { locale: dfLocale }),
           weight: displayWeight(h.max_weight, wUnit),
         }))
         return (
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3 gap-2">
               <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider">
-                Weight Progression
+                {t('Weight Progression')}
               </p>
               <PeriodSelector options={HISTORY_PERIODS} value={historyPeriod} onChange={setHistoryPeriod} />
             </div>
             {chartData.length < 2 ? (
-              <div className="flex items-center justify-center h-[110px] text-tx-muted text-sm">No data for this period</div>
+              <div className="flex items-center justify-center h-[110px] text-tx-muted text-sm">{t('No data for this period')}</div>
             ) : (
             <ResponsiveContainer width="100%" height={110}>
               <LineChart data={chartData}>
@@ -269,14 +270,14 @@ export default function ExerciseDetail() {
                     borderRadius: 8,
                     fontSize: 11,
                   }}
-                  formatter={(v: number) => [`${v} ${wUnit}`, 'Max weight']}
+                  formatter={(v: number) => [`${v} ${wUnit}`, t('Max weight')]}
                 />
                 <Line
                   type="monotone"
                   dataKey="weight"
-                  stroke="#0891b2"
+                  stroke="#00746B"
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#0891b2' }}
+                  dot={{ r: 3, fill: '#00746B' }}
                   activeDot={{ r: 4 }}
                 />
               </LineChart>
@@ -289,7 +290,7 @@ export default function ExerciseDetail() {
       {/* Instructions */}
       {descLines.length > 0 && (
         <div className="card p-4">
-          <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-3">Instructions</p>
+          <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-3">{t('Instructions')}</p>
           <div className="space-y-2.5">
             {descLines.map((line, i) => {
               const stepMatch = line.match(/^(\d+\.)\s*(.*)/)

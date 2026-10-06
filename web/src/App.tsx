@@ -24,6 +24,7 @@ import Settings from './pages/Settings'
 import ChangePassword from './pages/ChangePassword'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Charity from './pages/Charity'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -65,6 +66,7 @@ function App() {
             <Route path="/food/log" element={<LogFood />} />
             <Route path="/weight" element={<Weight />} />
             <Route path="/weight/:id" element={<WeightDetail />} />
+            <Route path="/charity" element={<Charity />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/settings/password" element={<ChangePassword />} />
             {/* Signed in, there was no catch-all at all — only the signed-OUT branch had

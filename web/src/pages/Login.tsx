@@ -8,6 +8,7 @@ import { formatVersion, registrationOpen, demoMode } from '@lyftr/shared'
 import Logo from '../components/Logo'
 import ServerSettings from '../components/ServerSettings'
 import PasswordField from '../components/ui/PasswordField'
+import { t } from '../i18n'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -69,15 +70,15 @@ export default function Login() {
         {/* Headline and features */}
         <div className="relative space-y-8">
           <h1 className="font-display font-bold text-5xl leading-tight tracking-tight">
-            Log. Lift.
+            {t('Log. Lift.')}
             <br />
             <span className="bg-gradient-to-r from-brand-500 to-violet-500 bg-clip-text text-transparent">
-              Progress.
+              {t('Progress.')}
             </span>
           </h1>
 
           <p className="text-tx-secondary text-base leading-relaxed max-w-sm">
-            Your self-hosted fitness tracker. Track workouts, log food, monitor weight — all under your control, running on your own server.
+            {t('Your self-hosted fitness tracker. Track workouts, log food, monitor weight — all under your control, running on your own server.')}
           </p>
 
           {/* Features */}
@@ -89,7 +90,7 @@ export default function Login() {
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-3 text-tx-muted text-sm">
                 <Icon className="w-4 h-4 text-brand-500" strokeWidth={2} />
-                {label}
+                {t(label)}
               </div>
             ))}
           </div>
@@ -97,7 +98,7 @@ export default function Login() {
 
         {/* Footer */}
         <div className="relative text-tx-muted text-xs">
-          © lyftr{serverInfo?.version ? ` · ${formatVersion(serverInfo.version)}` : ''}
+          © {t('Hadiyah Fit')}{serverInfo?.version ? ` · ${formatVersion(serverInfo.version)}` : ''}
         </div>
       </div>
 
@@ -112,10 +113,10 @@ export default function Login() {
           {/* Heading */}
           <div className="mb-8">
             <h2 className="font-display font-bold text-3xl text-tx-primary tracking-tight">
-              Welcome back
+              {t('Welcome back')}
             </h2>
             <p className="text-tx-muted text-sm mt-2">
-              Sign in to continue training.
+              {t('Sign in to continue training.')}
             </p>
           </div>
 
@@ -126,7 +127,7 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="label">Email</label>
+              <label htmlFor="email" className="label">{t('Email')}</label>
               <input
                 id="email"
                 type="email"
@@ -142,7 +143,7 @@ export default function Login() {
             {/* Password */}
             <PasswordField
               id="password"
-              label="Password"
+              label={t('Password')}
               value={password}
               onChange={setPassword}
               autoComplete="current-password"
@@ -153,7 +154,7 @@ export default function Login() {
             {error && (
               <div className="alert-error">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>{error}</span>
+                <span>{t(error)}</span>
               </div>
             )}
 
@@ -164,7 +165,7 @@ export default function Login() {
               className="btn-primary btn-lg w-full mt-6 flex items-center justify-center gap-2"
             >
               <LogIn className="w-4 h-4" />
-              {isLoading ? 'Signing in…' : 'Sign in'}
+              {isLoading ? t('Signing in…') : t('Sign in')}
             </button>
 
             {/* Divider — only when something follows it that is genuinely an alternative
@@ -174,7 +175,7 @@ export default function Login() {
             {(demoMode(serverInfo) || registrationOpen(serverInfo)) && (
               <div className="relative flex items-center my-6">
                 <div className="flex-1 h-px bg-surface-border" />
-                <span className="px-3 text-xs text-tx-muted uppercase tracking-wider">or</span>
+                <span className="px-3 text-xs text-tx-muted uppercase tracking-wider">{t('or')}</span>
                 <div className="flex-1 h-px bg-surface-border" />
               </div>
             )}
@@ -191,7 +192,7 @@ export default function Login() {
                 className="btn-secondary btn-lg w-full flex items-center justify-center gap-2"
               >
                 <Zap className="w-4 h-4 text-warning-400" />
-                Try demo account
+                {t('Try demo account')}
               </button>
             )}
           </form>
@@ -202,17 +203,17 @@ export default function Login() {
               (mastodon/mastodon#21556); a line of text answers them where they are. */}
           {registrationOpen(serverInfo) ? (
             <p className="mt-8 text-center text-sm text-tx-muted">
-              New here?{' '}
+              {t('New here?')}{' '}
               <Link
                 to="/register"
                 className="text-brand-400 font-medium hover:text-brand-300 transition-colors"
               >
-                Create account
+                {t('Create account')}
               </Link>
             </p>
           ) : (
             <p className="mt-8 text-center text-sm text-tx-muted">
-              This server is not accepting new accounts.
+              {t('This server is not accepting new accounts.')}
             </p>
           )}
         </div>

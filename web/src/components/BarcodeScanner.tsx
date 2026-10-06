@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useZxing } from 'react-zxing'
 import { X, AlertCircle } from 'lucide-react'
+import { t } from '../i18n'
 
 interface Props {
   onResult: (code: string) => void
@@ -49,11 +50,11 @@ export default function BarcodeScanner({ onResult, onClose }: Props) {
   return createPortal(
     <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
       <div className="flex items-center justify-between p-4">
-        <p className="text-white text-sm font-medium">Scan barcode</p>
+        <p className="text-white text-sm font-medium">{t('Scan barcode')}</p>
         <button
           onClick={onClose}
           className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-          aria-label="Close scanner"
+          aria-label={t('Close scanner')}
         >
           <X className="w-5 h-5 text-white" />
         </button>
@@ -65,23 +66,21 @@ export default function BarcodeScanner({ onResult, onClose }: Props) {
         {insecureContext ? (
           <div className="flex flex-col items-center gap-3 px-6 text-center">
             <AlertCircle className="w-8 h-8 text-error-400" />
-            <p className="text-white text-sm font-medium">Camera needs HTTPS</p>
+            <p className="text-white text-sm font-medium">{t('Camera needs HTTPS')}</p>
             <p className="text-white/60 text-xs leading-relaxed">
-              Browsers only allow camera access on secure pages. This site is served over
-              plain <span className="font-mono">http://</span> — put it behind a reverse proxy
-              with HTTPS to scan barcodes.
+              {t('Browsers only allow camera access on secure pages. This site is served over plain http:// — put it behind a reverse proxy with HTTPS to scan barcodes.')}
             </p>
             <button onClick={onClose} className="btn-primary btn-sm mt-2">
-              Search by name instead
+              {t('Search by name instead')}
             </button>
           </div>
         ) : cameraError ? (
           <div className="flex flex-col items-center gap-3 px-6 text-center">
             <AlertCircle className="w-8 h-8 text-error-400" />
-            <p className="text-white text-sm font-medium">Camera unavailable</p>
+            <p className="text-white text-sm font-medium">{t('Camera unavailable')}</p>
             <p className="text-white/50 text-xs font-mono break-all">{cameraError}</p>
             <button onClick={onClose} className="btn-primary btn-sm mt-2">
-              Search by name instead
+              {t('Search by name instead')}
             </button>
           </div>
         ) : null}
@@ -98,10 +97,10 @@ export default function BarcodeScanner({ onResult, onClose }: Props) {
 
         {!cameraError && !insecureContext && (
           <div className="absolute pointer-events-none" style={{ width: 260, height: 160 }}>
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-brand-400 rounded-tl" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-brand-400 rounded-tr" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-brand-400 rounded-bl" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-brand-400 rounded-br" />
+            <div className="absolute top-0 start-0 w-8 h-8 border-t-2 border-s-2 border-brand-400 rounded-ss" />
+            <div className="absolute top-0 end-0 w-8 h-8 border-t-2 border-e-2 border-brand-400 rounded-se" />
+            <div className="absolute bottom-0 start-0 w-8 h-8 border-b-2 border-s-2 border-brand-400 rounded-es" />
+            <div className="absolute bottom-0 end-0 w-8 h-8 border-b-2 border-e-2 border-brand-400 rounded-ee" />
             <div
               className="absolute inset-x-0 h-0.5 bg-brand-400/70"
               style={{ animation: 'barcode-scan 1.5s ease-in-out infinite' }}
@@ -112,7 +111,7 @@ export default function BarcodeScanner({ onResult, onClose }: Props) {
 
       {!insecureContext && !cameraError && (
         <p className="text-center text-white/60 text-xs pb-8 px-4">
-          Point camera at barcode — it will scan automatically
+          {t('Point camera at barcode — it will scan automatically')}
         </p>
       )}
 

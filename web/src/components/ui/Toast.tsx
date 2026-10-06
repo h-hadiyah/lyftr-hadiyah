@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ChevronRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { t } from '../../i18n'
 
 export type ToastVariant = 'default' | 'success' | 'brand' | 'warning' | 'error'
 
@@ -48,8 +49,8 @@ export default function Toast({ title, description, icon: Icon, variant = 'defau
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-tx-primary leading-tight">{title}</p>
-        {description && <p className="text-xs text-tx-muted leading-tight truncate">{description}</p>}
+        <p className="text-sm font-semibold text-tx-primary leading-tight">{t(title)}</p>
+        {description && <p className="text-xs text-tx-muted leading-tight truncate">{t(description)}</p>}
       </div>
       {onClick && <ChevronRight className="w-4 h-4 text-tx-muted flex-shrink-0" />}
     </>
@@ -62,7 +63,7 @@ export default function Toast({ title, description, icon: Icon, variant = 'defau
     <div role="status" className="fixed bottom-24 inset-x-3 z-[70] mx-auto max-w-md animate-slide-up">
       <div className={`flex items-center gap-3 rounded-2xl px-4 py-3 bg-surface-raised border shadow-lg ${v.border}`}>
         {onClick ? (
-          <button type="button" onClick={onClick} className="flex items-center gap-3 min-w-0 flex-1 text-left">
+          <button type="button" onClick={onClick} className="flex items-center gap-3 min-w-0 flex-1 text-start">
             {body}
           </button>
         ) : (
@@ -71,7 +72,7 @@ export default function Toast({ title, description, icon: Icon, variant = 'defau
         <button
           type="button"
           onClick={onDismiss}
-          aria-label="Dismiss"
+          aria-label={t('Dismiss')}
           className="p-1.5 -m-1.5 text-tx-muted hover:text-tx-primary flex-shrink-0"
         >
           <X className="w-4 h-4" />

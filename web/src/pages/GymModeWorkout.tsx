@@ -17,6 +17,7 @@ import StepperTile from '../components/ui/StepperTile'
 import NumberField from '../components/ui/NumberField'
 import { ConfirmSheet } from '../components/ui'
 import { displayWeight, displayToLbs } from '../stores/settings'
+import { t } from '../i18n'
 
 function buildBodyData(exercise: types.Exercise): IExerciseData[] {
   const primarySlugs = muscleToBodySlugs(exercise.muscle_group)
@@ -40,7 +41,7 @@ function ExerciseNotes({ exIdx, notes, onSave }: { exIdx: number; notes: string;
         onChange={e => setVal(e.target.value)}
         onBlur={commit}
         onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setVal(notes); setEditing(false) } }}
-        placeholder="Add a note…"
+        placeholder={t('Add a note…')}
         className="input text-sm w-full"
       />
     )
@@ -48,9 +49,9 @@ function ExerciseNotes({ exIdx, notes, onSave }: { exIdx: number; notes: string;
   return (
     <button
       onClick={() => { setVal(notes); setEditing(true) }}
-      className="text-xs text-tx-muted hover:text-tx-secondary transition-colors text-left w-full"
+      className="text-xs text-tx-muted hover:text-tx-secondary transition-colors text-start w-full"
     >
-      {notes ? <span className="italic">{notes}</span> : <span className="opacity-50">+ Add note</span>}
+      {notes ? <span className="italic">{notes}</span> : <span className="opacity-50">{t('+ Add note')}</span>}
     </button>
   )
 }
@@ -101,7 +102,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
     minimizeGym()
     // Surface the routine auto-progression as a toast on the workouts list (#40).
     navigate('/workouts', saved?.progression ? { state: { progression: saved.progression } } : undefined)
-  }, 'Failed to save workout')
+  }, t('Failed to save workout'))
 
   if (!session) return null
 
@@ -135,7 +136,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
               <button
                 key={i}
                 onClick={() => setGymState('exercise-info', i, 0)}
-                aria-label={`Go to exercise ${i + 1}`}
+                aria-label={t('Go to exercise {n}', { n: i + 1 })}
                 className={`h-1.5 rounded-full flex-shrink-0 transition-all duration-200 ${
                   i === activeIdx ? 'w-6 bg-brand-500' :
                   s.exercises[i].sets.every(st => st.completed) && s.exercises[i].sets.length > 0
@@ -156,21 +157,21 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             }`}
           >
             <Flag className="w-3.5 h-3.5" />
-            Finish
+            {t('Finish')}
           </button>
           <button
             onClick={handleMinimize}
             className="p-2 hover:bg-surface-muted rounded-xl transition-colors text-tx-muted"
-            aria-label="Minimize workout"
-            title="Minimize"
+            aria-label={t('Minimize workout')}
+            title={t('Minimize')}
           >
             <Minimize2 className="w-4 h-4" />
           </button>
           <button
             onClick={() => setConfirmCancel(true)}
             className="p-2 hover:bg-error-500/10 rounded-xl transition-colors text-tx-muted hover:text-error-400"
-            aria-label="Discard workout"
-            title="Discard workout"
+            aria-label={t('Discard workout')}
+            title={t('Discard workout')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -187,13 +188,13 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
       <ConfirmSheet
         open={confirmFinish}
         icon={Flag}
-        title="Finish Workout?"
-        message={`${completedSets} of ${totalSets} sets completed. Workout will be saved.`}
-        confirmLabel="Finish"
-        busyLabel="Saving…"
-        cancelLabel="Keep Going"
+        title={t('Finish Workout?')}
+        message={t('{done} of {total} sets completed. Workout will be saved.', { done: completedSets, total: totalSets })}
+        confirmLabel={t('Finish')}
+        busyLabel={t('Saving…')}
+        cancelLabel={t('Keep Going')}
         busy={finish.busy}
-        error={finish.error}
+        error={finish.error && t(finish.error)}
         onConfirm={() => { void finish.run() }}
         onCancel={() => { setConfirmFinish(false); finish.reset() }}
       />
@@ -201,10 +202,10 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
         open={confirmCancel}
         icon={Trash2}
         destructive
-        title="Discard workout?"
-        message="This ends the workout without saving — all progress is lost."
-        confirmLabel="Discard"
-        cancelLabel="Keep Going"
+        title={t('Discard workout?')}
+        message={t('This ends the workout without saving — all progress is lost.')}
+        confirmLabel={t('Discard')}
+        cancelLabel={t('Keep Going')}
         onConfirm={() => { cancelSession(); handleMinimize() }}
         onCancel={() => setConfirmCancel(false)}
       />
@@ -214,17 +215,17 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
   // ── Overview ──────────────────────────────────────────────────────────
   if (phase === 'overview') {
     return (
-      <div role="dialog" aria-modal="true" aria-label="Workout" className="fixed inset-0 z-[60] bg-surface-base overflow-y-auto flex flex-col">
+      <div role="dialog" aria-modal="true" aria-label={t('Workout')} className="fixed inset-0 z-[60] bg-surface-base overflow-y-auto flex flex-col">
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-surface-border flex-shrink-0">
           <div>
-            <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-0.5">Workout</p>
+            <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-0.5">{t('Workout')}</p>
             <h1 className="font-display font-bold text-xl text-tx-primary leading-tight">{session.name}</h1>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={handleMinimize} className="p-2 hover:bg-surface-muted rounded-xl transition-colors text-tx-muted" aria-label="Minimize">
+            <button onClick={handleMinimize} className="p-2 hover:bg-surface-muted rounded-xl transition-colors text-tx-muted" aria-label={t('Minimize')}>
               <Minimize2 className="w-4 h-4" />
             </button>
-            <button onClick={() => setConfirmCancel(true)} aria-label="Discard workout" title="Discard workout" className="p-2 hover:bg-surface-muted rounded-xl transition-colors text-tx-muted hover:text-error-400">
+            <button onClick={() => setConfirmCancel(true)} aria-label={t('Discard workout')} title={t('Discard workout')} className="p-2 hover:bg-surface-muted rounded-xl transition-colors text-tx-muted hover:text-error-400">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -234,17 +235,17 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
         <div className="grid grid-cols-3 gap-3 px-5 py-4 border-b border-surface-border flex-shrink-0">
           <div className="text-center">
             <p className="text-xl font-bold text-tx-primary tabular-nums">{session.exercises.length}</p>
-            <p className="text-[10px] text-tx-muted uppercase tracking-wide mt-0.5">Exercises</p>
+            <p className="text-[10px] text-tx-muted uppercase tracking-wide mt-0.5">{t('Exercises')}</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-tx-primary tabular-nums">{totalSets}</p>
-            <p className="text-[10px] text-tx-muted uppercase tracking-wide mt-0.5">Total Sets</p>
+            <p className="text-[10px] text-tx-muted uppercase tracking-wide mt-0.5">{t('Total Sets')}</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-tx-primary tabular-nums">
               {[...new Set(session.exercises.map(e => e.exercise.muscle_group))].length}
             </p>
-            <p className="text-[10px] text-tx-muted uppercase tracking-wide mt-0.5">Muscles</p>
+            <p className="text-[10px] text-tx-muted uppercase tracking-wide mt-0.5">{t('Muscles')}</p>
           </div>
         </div>
 
@@ -253,7 +254,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
           {session.exercises.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <Dumbbell className="w-10 h-10 text-tx-muted/30" />
-              <p className="text-sm text-tx-muted">No exercises added yet</p>
+              <p className="text-sm text-tx-muted">{t('No exercises added yet')}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -278,9 +279,9 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
                       <p className="text-sm font-semibold text-tx-primary truncate">{ex.exercise.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${muscleColor(ex.exercise.muscle_group)}`}>
-                          {ex.exercise.muscle_group}
+                          {t(ex.exercise.muscle_group)}
                         </span>
-                        <span className="text-[10px] text-tx-muted">{ex.sets.length} set{ex.sets.length === 1 ? '' : 's'}</span>
+                        <span className="text-[10px] text-tx-muted">{ex.sets.length === 1 ? t('1 set') : t('{n} sets', { n: ex.sets.length })}</span>
                       </div>
                     </div>
                     {done && <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />}
@@ -298,7 +299,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             className="w-full py-3 bg-surface-muted/60 hover:bg-surface-muted border border-surface-border hover:border-brand-500/40 rounded-2xl text-sm font-medium text-tx-secondary hover:text-brand-400 transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Add Exercise
+            {t('Add Exercise')}
           </button>
           {session.exercises.length > 0 && (
             <button
@@ -306,7 +307,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
               className="w-full py-4 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl text-base font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand-500/30 transition-colors"
             >
               <Play className="w-5 h-5 fill-current" />
-              Start Workout
+              {t('Start Workout')}
             </button>
           )}
         </div>
@@ -325,7 +326,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
   // ── Exercise info ─────────────────────────────────────────────────────
   if (phase === 'exercise-info') {
     const exercise = ex.exercise
-    const equipLabel = EQUIPMENT_LABEL[exercise.equipment?.toLowerCase()] || exercise.equipment
+    const equipLabel = t(EQUIPMENT_LABEL[exercise.equipment?.toLowerCase()] || exercise.equipment || '')
     const descLines = exercise.description
       ? exercise.description.split('\n').filter(l => l.trim())
       : []
@@ -334,13 +335,13 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
     const repsVals = ex.sets.map(s => s.target_reps).filter(r => r > 0)
     const wtVals = ex.sets.map(s => displayWeight(s.target_weight, wUnit)).filter(w => w > 0)
     const planStats = [
-      { icon: Layers, label: 'Sets', value: <>{ex.sets.length}</> },
-      { icon: Repeat, label: 'Reps', value: <>{numericRange(repsVals)}</> },
-      { icon: Dumbbell, label: 'Weight', value: <>{numericRange(wtVals)}<span className="text-xs font-semibold text-tx-muted ml-0.5">{wUnit}</span></> },
+      { icon: Layers, label: t('Sets'), value: <>{ex.sets.length}</> },
+      { icon: Repeat, label: t('Reps'), value: <>{numericRange(repsVals)}</> },
+      { icon: Dumbbell, label: t('Weight'), value: <>{numericRange(wtVals)}<span className="text-xs font-semibold text-tx-muted ms-0.5">{wUnit}</span></> },
     ]
 
     return (
-      <div role="dialog" aria-modal="true" aria-label="Workout" className="fixed inset-0 z-[60] bg-surface-base overflow-y-auto flex flex-col">
+      <div role="dialog" aria-modal="true" aria-label={t('Workout')} className="fixed inset-0 z-[60] bg-surface-base overflow-y-auto flex flex-col">
         <TopBar s={session} onBack={() => isFirst ? setPhase('overview') : setGymState('exercise', activeIdx - 1, 0)} />
 
         <div className="flex-1 overflow-y-auto">
@@ -360,7 +361,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
               <h2 className="font-display font-bold text-2xl text-tx-primary leading-tight">{exercise.name}</h2>
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${muscleColorBordered(exercise.muscle_group)}`}>
-                  {exercise.muscle_group}
+                  {t(exercise.muscle_group)}
                 </span>
                 {equipLabel && exercise.equipment !== 'other' && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-surface-muted border border-surface-border text-xs font-medium text-tx-secondary">
@@ -369,7 +370,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
                 )}
                 {exercise.category && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-surface-muted border border-surface-border text-xs font-medium text-tx-secondary capitalize">
-                    {exercise.category}
+                    {t(exercise.category)}
                   </span>
                 )}
               </div>
@@ -390,19 +391,19 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             <div className="card p-4">
               <div className="flex items-center gap-2">
                 <Timer className="w-4 h-4 text-brand-500" />
-                <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider">Rest between sets</p>
+                <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider">{t('Rest between sets')}</p>
               </div>
-              <p className="text-[11px] text-tx-muted mt-1 mb-3">Auto-starts when you complete a set</p>
+              <p className="text-[11px] text-tx-muted mt-1 mb-3">{t('Auto-starts when you complete a set')}</p>
               <RestPicker value={ex.rest_seconds ?? (settings.rest_seconds_default ?? 90)} onChange={secs => setExerciseRest(activeIdx, secs)} />
             </div>
 
             {/* Secondary muscles */}
             {exercise.secondary_muscles?.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-2">Also works</p>
+                <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-2">{t('Also works')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {exercise.secondary_muscles.map(m => (
-                    <span key={m} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${muscleColor(m)}`}>{m}</span>
+                    <span key={m} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${muscleColor(m)}`}>{t(m)}</span>
                   ))}
                 </div>
               </div>
@@ -411,25 +412,25 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             {/* Muscle diagram */}
             {bodyData.length > 0 && (
               <div className="card p-4">
-                <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-3">Muscles Worked</p>
+                <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-3">{t('Muscles Worked')}</p>
                 <div className="flex items-start justify-center gap-6">
                   <div className="flex flex-col items-center gap-1">
                     <Model data={bodyData} type="anterior" bodyColor={bodyColor} highlightedColors={highlightColors} style={{ width: '120px' }} />
-                    <span className="text-xs text-tx-muted">Front</span>
+                    <span className="text-xs text-tx-muted">{t('Front')}</span>
                   </div>
                   <div className="flex flex-col items-center gap-1">
                     <Model data={bodyData} type="posterior" bodyColor={bodyColor} highlightedColors={highlightColors} style={{ width: '120px' }} />
-                    <span className="text-xs text-tx-muted">Back</span>
+                    <span className="text-xs text-tx-muted">{t('Back')}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 mt-3 justify-center">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22d3ee' }} />
-                    <span className="text-xs text-tx-muted">Primary</span>
+                    <span className="text-xs text-tx-muted">{t('Primary')}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#0e7490' }} />
-                    <span className="text-xs text-tx-muted">Secondary</span>
+                    <span className="text-xs text-tx-muted">{t('Secondary')}</span>
                   </div>
                 </div>
               </div>
@@ -438,7 +439,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             {/* Instructions */}
             {descLines.length > 0 && (
               <div className="card p-4">
-                <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-3">Instructions</p>
+                <p className="text-xs font-semibold text-tx-muted uppercase tracking-wider mb-3">{t('Instructions')}</p>
                 <div className="space-y-2.5">
                   {descLines.map((line, i) => {
                     const stepMatch = line.match(/^(\d+\.)\s*(.*)/)
@@ -464,7 +465,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             className="w-full py-4 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl text-base font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand-500/30 transition-colors"
           >
             <Play className="w-5 h-5 fill-current" />
-            Begin Exercise
+            {t('Begin Exercise')}
           </button>
         </div>
 
@@ -520,7 +521,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
   const hideCompleteForRest = restingHere && clampedSetIdx === restNextSet
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Workout" className="fixed inset-0 z-[60] bg-surface-base flex flex-col">
+    <div role="dialog" aria-modal="true" aria-label={t('Workout')} className="fixed inset-0 z-[60] bg-surface-base flex flex-col">
       <TopBar s={session} onBack={() => setPhase('exercise-info')} />
 
       {/* Exercise name + muscle (compact) */}
@@ -530,13 +531,13 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             <h2 className="font-display font-bold text-lg text-tx-primary leading-tight truncate">{ex.exercise.name}</h2>
             <div className="flex items-center gap-2 mt-1">
               <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${muscleColor(ex.exercise.muscle_group)}`}>
-                {ex.exercise.muscle_group}
+                {t(ex.exercise.muscle_group)}
               </span>
-              <span className="text-xs text-tx-muted tabular-nums">{completedHere}/{ex.sets.length} sets done</span>
+              <span className="text-xs text-tx-muted tabular-nums">{t('{done}/{total} sets done', { done: completedHere, total: ex.sets.length })}</span>
             </div>
           </div>
           {!allSetsComplete && (
-            <button onClick={handleRemoveExercise} aria-label="Remove this exercise" title="Remove exercise" className="p-1.5 hover:bg-error-500/10 rounded-lg transition-colors flex-shrink-0">
+            <button onClick={handleRemoveExercise} aria-label={t('Remove this exercise')} title={t('Remove exercise')} className="p-1.5 hover:bg-error-500/10 rounded-lg transition-colors flex-shrink-0">
               <Trash2 className="w-4 h-4 text-tx-muted hover:text-error-400 transition-colors" />
             </button>
           )}
@@ -568,7 +569,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
               <button
                 key={i}
                 onClick={() => setActiveSetIdx(i)}
-                aria-label={`Set ${i + 1}${s.completed ? ', done' : ''}${resting ? ', resting' : ''}`}
+                aria-label={[t('Set {n}', { n: i + 1 }), s.completed && t('done'), resting && t('resting')].filter(Boolean).join(', ')}
                 aria-current={i === clampedSetIdx}
                 className={`flex items-center justify-center gap-1 min-w-[2.75rem] h-10 px-3 rounded-full text-sm font-bold tabular-nums transition-all active:scale-95 ${
                   i === clampedSetIdx ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/30' :
@@ -586,8 +587,8 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
         {/* Target reference for this set (the goal to hit) */}
         {(set.target_reps > 0 || set.target_weight > 0) && (
           <p className="text-sm text-tx-muted text-center">
-            Target{' '}
-            <span className="font-semibold text-tx-secondary tabular-nums">{set.target_reps > 0 ? set.target_reps : '—'} reps</span>
+            {t('Target')}{' '}
+            <span className="font-semibold text-tx-secondary tabular-nums">{t('{n} reps', { n: set.target_reps > 0 ? set.target_reps : '—' })}</span>
             {set.target_weight > 0 && (
               <> · <span className="font-semibold text-tx-secondary tabular-nums">{displayWeight(set.target_weight, wUnit)} {wUnit}</span></>
             )}
@@ -600,7 +601,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
         <div className="w-full grid grid-cols-2 gap-3">
           {/* Reps — key by set so a half-typed value can't bleed to the next set */}
           <StepperTile
-            icon={Repeat} label="Reps" name="reps" step={REP_STEP} disabled={set.completed}
+            icon={Repeat} label={t('Reps')} name="reps" step={REP_STEP} disabled={set.completed}
             onStep={d => updateSet(activeIdx, clampedSetIdx, 'actual_reps', clampStep(set.actual_reps || 0, d, { min: 0 }))}
           >
             <NumberField
@@ -610,13 +611,13 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
               onChange={v => updateSet(activeIdx, clampedSetIdx, 'actual_reps', Math.round(clampValue(v)))}
               placeholder={set.target_reps > 0 ? String(set.target_reps) : '0'}
               disabled={set.completed}
-              aria-label="Reps"
+              aria-label={t('Reps')}
             />
           </StepperTile>
 
           {/* Weight */}
           <StepperTile
-            icon={Dumbbell} label={`Weight (${wUnit})`} name="weight" step={PLATE_STEP} disabled={set.completed}
+            icon={Dumbbell} label={t('Weight ({unit})', { unit: wUnit })} name="weight" step={PLATE_STEP} disabled={set.completed}
             onStep={d => updateSet(activeIdx, clampedSetIdx, 'actual_weight', displayToLbs(clampStep(displayWeight(set.actual_weight, wUnit), d, { min: 0 }), wUnit))}
           >
             <NumberField
@@ -626,7 +627,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
               onChange={v => updateSet(activeIdx, clampedSetIdx, 'actual_weight', displayToLbs(clampValue(v), wUnit))}
               placeholder={set.target_weight > 0 ? String(displayWeight(set.target_weight, wUnit)) : '0'}
               disabled={set.completed}
-              aria-label="Weight"
+              aria-label={t('Weight')}
             />
           </StepperTile>
         </div>
@@ -649,7 +650,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             }`}
           >
             <CheckCircle2 className="w-6 h-6" />
-            {set.completed ? 'Completed' : 'Complete Set'}
+            {set.completed ? t('Completed') : t('Complete Set')}
           </button>
 
           {/* Remove set — hidden on the last set (removing it would empty the exercise
@@ -659,7 +660,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
               onClick={() => handleRemoveSet(clampedSetIdx)}
               className="text-xs text-tx-muted/50 hover:text-error-400 transition-colors"
             >
-              Remove this set
+              {t('Remove this set')}
             </button>
           )}
         </div>
@@ -682,7 +683,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             className="flex-1 py-3 flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-surface-border hover:border-brand-500/40 hover:bg-brand-500/5 text-xs font-medium text-tx-muted hover:text-brand-400 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
-            Add Set
+            {t('Add Set')}
           </button>
           <button
             onClick={() => setActiveSetIdx(clampedSetIdx + 1)}
@@ -700,7 +701,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
             className="flex items-center gap-1.5 px-4 py-3 rounded-xl bg-surface-muted hover:bg-surface-muted/80 border border-surface-border text-tx-secondary text-sm font-medium transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            Info
+            {t('Info')}
           </button>
           {isLast ? (
             <button
@@ -712,7 +713,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
               }`}
             >
               <Flag className="w-4 h-4" />
-              Finish Workout
+              {t('Finish Workout')}
             </button>
           ) : (
             <button
@@ -723,7 +724,7 @@ export default function GymModeWorkout({ wUnit }: GymModeWorkoutProps) {
                   : 'bg-surface-muted hover:bg-surface-muted/80 text-tx-secondary border border-surface-border'
               }`}
             >
-              Next Exercise
+              {t('Next Exercise')}
               <ChevronRight className="w-4 h-4" />
             </button>
           )}

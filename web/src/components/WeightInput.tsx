@@ -1,4 +1,5 @@
 import { useNumericText } from '@lyftr/shared'
+import { t } from '../i18n'
 
 interface Props {
   value: string
@@ -53,10 +54,10 @@ export default function WeightInput({
         min="0"
         autoFocus={autoFocus}
         disabled={disabled}
-        className={`input ${inputSize} pr-7 text-center w-full tabular-nums ${disabled ? 'opacity-40' : ''}`}
+        className={`input ${inputSize} pe-7 text-center w-full tabular-nums ${disabled ? 'opacity-40' : ''}`}
         placeholder={placeholder}
       />
-      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-tx-muted pointer-events-none">{unit}</span>
+      <span className="absolute end-2 top-1/2 -translate-y-1/2 text-xs text-tx-muted pointer-events-none">{t(unit)}</span>
     </div>
   )
 }

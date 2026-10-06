@@ -7,3 +7,6 @@ import { cleanup } from '@testing-library/react'
 afterEach(() => {
   cleanup()
 })
+
+// Unit tests assert the English copy; the app itself defaults to Arabic.
+try { localStorage.setItem('lang', 'en') } catch { /* no storage */ }

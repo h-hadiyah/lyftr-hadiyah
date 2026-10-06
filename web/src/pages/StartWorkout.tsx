@@ -4,6 +4,7 @@ import { ArrowLeft, Zap, BookOpen, ChevronRight, Play, Timer, Trash2 } from 'luc
 import { useWorkoutSession } from '../stores/workoutSession'
 import ProgramPicker from '../components/ProgramPicker'
 import { activeSessionExercisesForDay, sessionNameForDay, types } from '@lyftr/shared'
+import { t, dateLocale } from '../i18n'
 
 export default function StartWorkout() {
   const navigate = useNavigate()
@@ -11,7 +12,7 @@ export default function StartWorkout() {
   const [showProgramPicker, setShowProgramPicker] = useState(false)
 
   const startQuick = () => {
-    const name = `Workout — ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+    const name = t('Workout — {date}', { date: new Date().toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' }) })
     startSession(name, [])
     navigate('/workout/active')
   }
@@ -26,13 +27,13 @@ export default function StartWorkout() {
     <div className="space-y-6 animate-slide-up">
       <div className="flex items-center gap-3">
         <button
-          aria-label="Go back"
+          aria-label={t('Go back')}
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-tx-muted" />
         </button>
-        <h1 className="font-display font-bold text-2xl text-tx-primary">Start Workout</h1>
+        <h1 className="font-display font-bold text-2xl text-tx-primary">{t('Start Workout')}</h1>
       </div>
 
       {/* Active session — resume or discard */}
@@ -44,7 +45,7 @@ export default function StartWorkout() {
             </div>
             <div>
               <p className="text-sm font-bold text-tx-primary">{session.name}</p>
-              <p className="text-xs text-amber-400/80">Workout in progress</p>
+              <p className="text-xs text-amber-400/80">{t('Workout in progress')}</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -52,13 +53,13 @@ export default function StartWorkout() {
               onClick={() => navigate('/workout/active')}
               className="flex-1 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
             >
-              <Play className="w-4 h-4" /> Resume
+              <Play className="w-4 h-4" /> {t('Resume')}
             </button>
             <button
               onClick={() => cancelSession()}
               className="flex-1 py-2.5 bg-surface-muted hover:bg-error-500/10 text-tx-secondary hover:text-error-400 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 border border-surface-border"
             >
-              <Trash2 className="w-4 h-4" /> Discard
+              <Trash2 className="w-4 h-4" /> {t('Discard')}
             </button>
           </div>
         </div>
@@ -72,9 +73,9 @@ export default function StartWorkout() {
         <div className="w-12 h-12 rounded-xl bg-brand-500 flex items-center justify-center flex-shrink-0">
           <Zap className="w-6 h-6 text-white" />
         </div>
-        <div className="text-left flex-1">
-          <p className="font-semibold text-tx-primary text-lg">Quick Start</p>
-          <p className="text-sm text-tx-muted mt-0.5">Start blank, add exercises as you go</p>
+        <div className="text-start flex-1">
+          <p className="font-semibold text-tx-primary text-lg">{t('Quick Start')}</p>
+          <p className="text-sm text-tx-muted mt-0.5">{t('Start blank, add exercises as you go')}</p>
         </div>
         <ChevronRight className="w-5 h-5 text-tx-muted opacity-0 group-hover:opacity-100 transition-opacity" />
       </button>
@@ -87,9 +88,9 @@ export default function StartWorkout() {
         <div className="w-12 h-12 rounded-xl bg-surface-muted border border-surface-border flex items-center justify-center flex-shrink-0">
           <BookOpen className="w-6 h-6 text-brand-500" />
         </div>
-        <div className="text-left flex-1">
-          <p className="font-semibold text-tx-primary text-lg">Start from Program</p>
-          <p className="text-sm text-tx-muted mt-0.5">Load a saved routine's day</p>
+        <div className="text-start flex-1">
+          <p className="font-semibold text-tx-primary text-lg">{t('Start from Program')}</p>
+          <p className="text-sm text-tx-muted mt-0.5">{t("Load a saved routine's day")}</p>
         </div>
         <ChevronRight className="w-5 h-5 text-tx-muted opacity-0 group-hover:opacity-100 transition-opacity" />
       </button>

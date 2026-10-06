@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/auth'
 import { useAsyncAction, differentRuleLabel, lengthRuleLabel, matchRuleLabel, newPasswordRules } from '@lyftr/shared'
 import PageHeader from '../components/ui/PageHeader'
 import PasswordField, { Rule } from '../components/ui/PasswordField'
+import { t } from '../i18n'
 
 // Its own route rather than a disclosure inside Settings, because /.well-known/change-password
 // (W3C Change Password URL — Safari Keychain, Chrome Password Checkup, 1Password) redirects
@@ -43,7 +44,7 @@ export default function ChangePassword() {
     return (
       <div className="space-y-5 animate-slide-up max-w-lg">
         <Link to="/settings" className="flex items-center gap-1.5 text-sm text-tx-muted hover:text-tx-primary transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Settings
+          <ArrowLeft className="w-4 h-4" /> {t('Settings')}
         </Link>
 
         <div className="card p-6 flex flex-col items-center text-center gap-3">
@@ -51,13 +52,12 @@ export default function ChangePassword() {
             <ShieldCheck className="w-6 h-6 text-success-400" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-xl text-tx-primary">Password changed</h1>
+            <h1 className="font-display font-bold text-xl text-tx-primary">{t('Password changed')}</h1>
             <p className="text-sm text-tx-muted mt-1">
-              You are still signed in here. Every other device has been signed out and will
-              need the new password.
+              {t('You are still signed in here. Every other device has been signed out and will need the new password.')}
             </p>
           </div>
-          <Link to="/settings" className="btn-secondary btn-sm mt-1">Back to settings</Link>
+          <Link to="/settings" className="btn-secondary btn-sm mt-1">{t('Back to settings')}</Link>
         </div>
       </div>
     )
@@ -66,12 +66,12 @@ export default function ChangePassword() {
   return (
     <div className="space-y-5 animate-slide-up max-w-lg">
       <Link to="/settings" className="flex items-center gap-1.5 text-sm text-tx-muted hover:text-tx-primary transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Settings
+        <ArrowLeft className="w-4 h-4" /> {t('Settings')}
       </Link>
 
       <PageHeader
-        title="Change password"
-        subtitle="You will stay signed in here. Every other device is signed out."
+        title={t('Change password')}
+        subtitle={t('You will stay signed in here. Every other device is signed out.')}
       />
 
       <form onSubmit={submit} className="card p-4 space-y-4">
@@ -92,7 +92,7 @@ export default function ChangePassword() {
 
         <PasswordField
           id="current-password"
-          label="Current password"
+          label={t('Current password')}
           value={current}
           onChange={setCurrent}
           autoComplete="current-password"
@@ -100,23 +100,23 @@ export default function ChangePassword() {
 
         <PasswordField
           id="new-password"
-          label="New password"
+          label={t('New password')}
           value={next}
           onChange={setNext}
           autoComplete="new-password"
         >
-          <Rule state={rules.length}>{lengthRuleLabel(next)}</Rule>
-          <Rule state={rules.different}>{differentRuleLabel()}</Rule>
+          <Rule state={rules.length}>{t(lengthRuleLabel(next))}</Rule>
+          <Rule state={rules.different}>{t(differentRuleLabel())}</Rule>
         </PasswordField>
 
         <PasswordField
           id="confirm-password"
-          label="Confirm new password"
+          label={t('Confirm new password')}
           value={confirm}
           onChange={setConfirm}
           autoComplete="new-password"
         >
-          <Rule state={rules.match}>{matchRuleLabel(rules.match)}</Rule>
+          <Rule state={rules.match}>{t(matchRuleLabel(rules.match))}</Rule>
         </PasswordField>
 
         {/* Server-side failures only — a wrong current password, or a change that landed
@@ -125,7 +125,7 @@ export default function ChangePassword() {
         {save.error && (
           <div className="alert-error">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <span>{save.error}</span>
+            <span>{t(save.error)}</span>
           </div>
         )}
 
@@ -135,10 +135,10 @@ export default function ChangePassword() {
             disabled={save.busy || !rules.ready}
             className="btn-primary btn-sm flex-1 flex items-center justify-center gap-2"
           >
-            {save.busy ? <><Loader className="w-3.5 h-3.5 animate-spin" /> Saving</> : 'Update password'}
+            {save.busy ? <><Loader className="w-3.5 h-3.5 animate-spin" /> {t('Saving')}</> : t('Update password')}
           </button>
           <Link to="/settings" className="btn-secondary btn-sm flex-1 flex items-center justify-center">
-            Cancel
+            {t('Cancel')}
           </Link>
         </div>
       </form>

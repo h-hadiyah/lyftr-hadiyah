@@ -9,6 +9,7 @@ import {
   MIXED_CONTENT_WARNING,
 } from '../stores/server'
 import { testServerConnection } from '../services/api'
+import { t } from '../i18n'
 
 type Status =
   | { kind: 'idle' }
@@ -37,7 +38,7 @@ export default function ServerSettings() {
     if (raw && !normalized) {
       setStatus({
         kind: 'error',
-        message: 'Include http:// or https:// — e.g. http://192.168.1.10:3000',
+        message: t('Include http:// or https:// — e.g. http://192.168.1.10:3000'),
       })
       return
     }
@@ -51,7 +52,7 @@ export default function ServerSettings() {
     try {
       await setServerUrl(normalized)
     } catch {
-      setStatus({ kind: 'error', message: "Couldn't save the server URL — this browser is blocking storage." })
+      setStatus({ kind: 'error', message: t("Couldn't save the server URL — this browser is blocking storage.") })
       return
     }
     setInput(normalized)
@@ -59,8 +60,8 @@ export default function ServerSettings() {
     const result = await testServerConnection(normalized)
     setStatus(
       result.ok
-        ? { kind: 'ok', message: `Connected · ${result.info.name} ${result.info.version}` }
-        : { kind: 'warn', message: `Saved — ${result.message}` },
+        ? { kind: 'ok', message: t('Connected · {name} {version}', { name: result.info.name, version: result.info.version }) }
+        : { kind: 'warn', message: t('Saved — {message}', { message: t(result.message) }) },
     )
   }
 
@@ -72,31 +73,31 @@ export default function ServerSettings() {
         className="flex items-center gap-2 px-3 py-2 w-full text-xs text-tx-muted hover:text-tx-secondary rounded-lg hover:bg-surface-muted/40 transition-colors"
       >
         <Server className="w-3.5 h-3.5" />
-        <span>Server settings</span>
+        <span>{t('Server settings')}</span>
         {/* Stays visible while the panel is collapsed — the problem outlives the moment of entry. */}
         {blocked && (
-          <span className="flex items-center gap-1 text-error-400" title={MIXED_CONTENT_WARNING}>
+          <span className="flex items-center gap-1 text-error-400" title={t(MIXED_CONTENT_WARNING)}>
             <AlertTriangle className="w-3 h-3" />
-            Blocked
+            {t('Blocked')}
           </span>
         )}
         {insecure && (
-          <span className="flex items-center gap-1 text-warning-400" title={INSECURE_SERVER_WARNING}>
+          <span className="flex items-center gap-1 text-warning-400" title={t(INSECURE_SERVER_WARNING)}>
             <AlertTriangle className="w-3 h-3" />
-            Not encrypted
+            {t('Not encrypted')}
           </span>
         )}
-        <ChevronDown className={`w-3 h-3 ml-auto transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 ms-auto transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
         <div className="mt-2 p-3 bg-surface-muted/30 border border-surface-border rounded-lg space-y-2">
-          <label className="block text-xs font-medium text-tx-secondary uppercase tracking-wider">Server URL</label>
+          <label className="block text-xs font-medium text-tx-secondary uppercase tracking-wider">{t('Server URL')}</label>
           <input
             type="text"
             value={input}
             onChange={e => { setInput(e.target.value); setStatus({ kind: 'idle' }) }}
-            placeholder="Leave blank to use this site"
+            placeholder={t('Leave blank to use this site')}
             className="input text-sm"
             autoComplete="off"
             autoCapitalize="off"
@@ -104,19 +105,19 @@ export default function ServerSettings() {
           />
 
           <p className="text-[11px] leading-relaxed text-tx-muted">
-            Full URL, e.g. <span className="font-mono text-tx-secondary">https://lyftr.example.com</span>
+            {t('Full URL, e.g.')} <span className="font-mono text-tx-secondary">https://lyftr.example.com</span>
           </p>
 
           {blocked && (
             <p className="flex items-start gap-1.5 text-xs text-error-400">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span>{MIXED_CONTENT_WARNING}</span>
+              <span>{t(MIXED_CONTENT_WARNING)}</span>
             </p>
           )}
           {insecure && (
             <p className="flex items-start gap-1.5 text-xs text-warning-400">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span>{INSECURE_SERVER_WARNING}</span>
+              <span>{t(INSECURE_SERVER_WARNING)}</span>
             </p>
           )}
 
@@ -142,20 +143,20 @@ export default function ServerSettings() {
               className="flex-1 px-2 py-1.5 text-xs bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5"
             >
               {status.kind === 'testing'
-                ? (<><Loader className="w-3.5 h-3.5 animate-spin" /> Testing…</>)
-                : 'Test & Save'}
+                ? (<><Loader className="w-3.5 h-3.5 animate-spin" /> {t('Testing…')}</>)
+                : t('Test & Save')}
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="flex-1 px-2 py-1.5 text-xs bg-surface-border text-tx-secondary hover:bg-surface-border/80 rounded-lg transition-colors"
             >
-              Close
+              {t('Close')}
             </button>
           </div>
 
           <p className="text-xs text-tx-muted pt-1">
-            {serverUrl ? `Current: ${serverUrl}` : 'Using this site’s address (reverse proxy)'}
+            {serverUrl ? t('Current: {url}', { url: serverUrl }) : t('Using this site’s address (reverse proxy)')}
           </p>
         </div>
       )}

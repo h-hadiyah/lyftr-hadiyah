@@ -12,8 +12,8 @@ export default {
       // '<name> Variable' is what @fontsource-variable registers; the bare name stays next in
       // each stack so a locally-installed copy still beats the system fallback.
       fontFamily: {
-        sans:    ['Plus Jakarta Sans Variable', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-        display: ['Outfit Variable', 'Outfit', 'Plus Jakarta Sans Variable', 'sans-serif'],
+        sans:    ['IBM Plex Sans Arabic', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
+        display: ['IBM Plex Sans Arabic', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
         mono:    ['JetBrains Mono Variable', 'JetBrains Mono', 'Fira Code', 'monospace'],
       },
       colors: {
@@ -42,7 +42,7 @@ export default {
         'gradient-brand': GRADIENT_CSS,
       },
       boxShadow: {
-        'glow-sm':  '0 0 16px rgba(0,184,217,0.18)',
+        'glow-sm':  '0 0 16px rgba(0,161,149,0.18)',
         'card':     '0 1px 2px rgba(0,0,0,0.08)',
         'card-md':  '0 4px 16px rgba(0,0,0,0.12)',
         'dropdown': '0 8px 24px rgba(0,0,0,0.20), 0 0 0 1px var(--surface-border)',
