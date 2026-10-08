@@ -19,5 +19,10 @@ services:
         value: /app/data/lyftr.db
       - key: CORS_ORIGIN
         value: https://lyftr-hadiyah.pages.dev
+      # The single access key typed on the login screen. Not in the repo: Render asks for it on deploy.
+      - key: DEMO_PASSWORD
+        sync: false
+      - key: REGISTRATION
+        value: closed
       - key: JWT_SECRET
         generateValue: true

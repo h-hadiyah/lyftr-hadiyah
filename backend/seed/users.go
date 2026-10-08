@@ -3,6 +3,7 @@ package seed
 import (
 	"database/sql"
 	"log"
+	"os"
 
 	"github.com/Cawlumm/lyftr-backend/utils"
 )
@@ -19,7 +20,13 @@ func DemoUser(db *sql.DB) {
 		return
 	}
 
-	hash, err := utils.HashPassword("password123")
+	// DEMO_PASSWORD lets a deployment replace the published password (Hadiyah uses a
+	// single shared access key); unset keeps upstream behaviour.
+	password := os.Getenv("DEMO_PASSWORD")
+	if password == "" {
+		password = "password123"
+	}
+	hash, err := utils.HashPassword(password)
 	if err != nil {
 		log.Printf("seed: failed to hash password: %v", err)
 		return
@@ -33,7 +40,7 @@ func DemoUser(db *sql.DB) {
 
 	userID, _ := res.LastInsertId()
 	db.Exec(`INSERT INTO user_settings (user_id) VALUES (?)`, userID)
-	log.Println("seed: demo user created (demo@lyftr.local / password123)")
+	log.Println("seed: demo user created (demo@lyftr.local)")
 }
 
 // WarnLeftoverDemoUser flags a demo account on an instance that is no longer seeding

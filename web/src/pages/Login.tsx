@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { AlertCircle, Zap, Dumbbell, Apple, TrendingUp, LogIn } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { AlertCircle, Dumbbell, Apple, TrendingUp, LogIn } from 'lucide-react'
 import { useAuthStore } from '../stores/auth'
 import { apiErrorMessage } from '../services/api'
 import { useServerInfo } from '../hooks/useServerInfo'
-import { formatVersion, registrationOpen, demoMode } from '@lyftr/shared'
+import { formatVersion } from '@lyftr/shared'
 import Logo from '../components/Logo'
-import ServerSettings from '../components/ServerSettings'
 import PasswordField from '../components/ui/PasswordField'
 import { t } from '../i18n'
 
@@ -15,7 +14,8 @@ export default function Login() {
   const { login } = useAuthStore()
   const serverInfo = useServerInfo()
 
-  const [email, setEmail]           = useState('')
+  // Hadiyah build: one shared access key, checked server-side as the demo account's
+  // password (DEMO_PASSWORD on the backend). No email, no sign-up.
   const [password, setPassword]     = useState('')
   const [error, setError]           = useState('')
   const [isLoading, setLoading]     = useState(false)
@@ -25,26 +25,15 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      await login(email, password)
+      await login('demo@lyftr.local', password.trim())
       navigate('/')
     } catch (err: any) {
-      setError(apiErrorMessage(err, 'Invalid email or password.'))
+      setError(err?.response?.status === 401 ? 'Wrong access key.' : apiErrorMessage(err, 'Wrong access key.'))
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDemoLogin = async () => {
-    setLoading(true)
-    try {
-      await login('demo@lyftr.local', 'password123')
-      navigate('/')
-    } catch (err: any) {
-      setError(apiErrorMessage(err, "Couldn't sign in to the demo account."))
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-surface-base">
@@ -120,34 +109,16 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Server selector */}
-          <ServerSettings />
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="label">{t('Email')}</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="input mt-2"
-                placeholder="you@example.com"
-                autoComplete="email"
-                required
-              />
-            </div>
-
             {/* Password */}
             <PasswordField
               id="password"
-              label={t('Password')}
+              label={t('Access key')}
               value={password}
               onChange={setPassword}
               autoComplete="current-password"
-              placeholder="••••••••"
+              placeholder=""
             />
 
             {/* Error */}
@@ -168,54 +139,8 @@ export default function Login() {
               {isLoading ? t('Signing in…') : t('Sign in')}
             </button>
 
-            {/* Divider — only when something follows it that is genuinely an alternative
-                way in. Where there is no demo account and registration is closed there is
-                nothing below but a statement, and an "or" heading it reads like the start
-                of an option that never arrives. */}
-            {(demoMode(serverInfo) || registrationOpen(serverInfo)) && (
-              <div className="relative flex items-center my-6">
-                <div className="flex-1 h-px bg-surface-border" />
-                <span className="px-3 text-xs text-tx-muted uppercase tracking-wider">{t('or')}</span>
-                <div className="flex-1 h-px bg-surface-border" />
-              </div>
-            )}
-
-            {/* Gated on the server, not on import.meta.env.DEV, which is decided at build
-                time and so was wrong both ways: absent from the public demo (a production
-                build) and present against a DEMO_MODE=off server, where it 401s. DemoMode is
-                the same flag that seeds the account, so the button follows the account. */}
-            {demoMode(serverInfo) && (
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                disabled={isLoading}
-                className="btn-secondary btn-lg w-full flex items-center justify-center gap-2"
-              >
-                <Zap className="w-4 h-4 text-warning-400" />
-                {t('Try demo account')}
-              </button>
-            )}
           </form>
 
-          {/* A closed instance says so rather than offering a link that 403s on submit —
-              but it does still say so. Removing the signup path without a trace sends
-              someone who came here to sign up hunting for a button that is not there
-              (mastodon/mastodon#21556); a line of text answers them where they are. */}
-          {registrationOpen(serverInfo) ? (
-            <p className="mt-8 text-center text-sm text-tx-muted">
-              {t('New here?')}{' '}
-              <Link
-                to="/register"
-                className="text-brand-400 font-medium hover:text-brand-300 transition-colors"
-              >
-                {t('Create account')}
-              </Link>
-            </p>
-          ) : (
-            <p className="mt-8 text-center text-sm text-tx-muted">
-              {t('This server is not accepting new accounts.')}
-            </p>
-          )}
         </div>
       </div>
     </div>
